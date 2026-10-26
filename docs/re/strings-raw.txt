@@ -1,0 +1,928 @@
+11835 =87u
+11868 <C&8
+12352  !"$%&
+12384  !#%'(
+12413  !"#$%&(*
+12445  !"#%')+-
+12476 !$%&')+-/0
+12507 !#%&')+-/02
+12538  "%()*+-/135
+12569  "$&)*,.02469
+12599 !#%')+-./12469<
+12631  "$&(+./02469<?
+12661 !"#%'),/23468;4AD
+12692  #$%'),/25679;>ADG
+13843 Z[X.
+14103 QRWV
+14123 ^_ZY
+14564 :E!u
+14572 :E5u
+15297 u"&
+15713 WPS2
+15735 &DD[X_
+15829 e%:e%r
+16864 tK|%2
+16946 uWQR
+16955 &DDY_
+16963 E($ 
+17007 E( 
+17329 E/$?
+17385 E.$?
+17751 WPS2
+17773 &DD[X_
+18019 1DKa~
+18052 JJJJ
+18076 JJ
+18106 JJ
+18118 JJ
+18156 JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJp
+18774 End patch table
+18842 wF!!
+18853 V( !
+18897 u$`a
+19875 t"R3
+20080 9>TJ
+20122 7>VJR
+20128 ;.VJ
+20142 7>VJ3
+20152 ^J->@3
+20163 7.VJZ
+20277 5>TJ
+20292 5.TJ
+20584 I,"t
+20590 "<\u
+21061 ..WU
+21363 >$Y]
+21629 _^]RS
+22014 VWVW
+22032 _^_^]
+22081 C(*) )
+22088 )4))
+22116 (t(i(
+22675 ?pkt
+22805 F;6$S|
+22843 ?PKu"
+22932 XZ&;W
+22938 uV&;
+24122 :St/
+24786 eF;6$S|
+24997 ;F;6)Q|
+25081 tn;6
+25500 ;Fr
+26092 RWPV
+27006 LLVW
+27290 >"SWV
+27348 ;6)Q~
+27384 +Q;6
+27799 ;Fr
+27932 WR_^
+28049 WR_^
+28103 WR_^
+28325 WR_^
+28354 WR_^
+28412 N+N
+28636 WR_^
+28659 WR_^
+28688 WR_^
+28717 WR_^
+28752 WR_^
+28784 WR_^
+28816 WR_^
+28851 WR_^
+28899 WR[X
+28916 WR_^
+28964 WR_^
+29025 WR_^
+29073 WR_^
+29147 WR_^
+29322 WR_^
+29360 WR_^
+29391 WR_^
+29418 WR_^
+29459 WR_^
+29487 6!W&
+29520 WR[X
+29576 WR_^
+29630 WR_^
+29711 WR_^
+29749 WR_^
+29892 WR_^
+29953 WR_^
+29988 WR_^
+30263 ?Z4u
+31097 PSQR
+31104 G@@
+31145 ZY[X
+31664 PSQRW
+31672 _ZY[X
+32418 @IKB
+32466 r/PS2
+32554 WVWV
+32843 WVSSPP
+33213 SPPP
+33243 XX[@;
+33677 ^X@;F
+34357 u7VW
+34374 _^VW
+34639  !H#l%
+34678 GjI<K
+35365 u6PSQR
+35381 ZY[Xs#
+35538 PSQR
+35552 ZY[X
+37803 ;Vu
+37848 ;Vu
+38062 Gb;F
+38079 &+Gb@
+38094 Gf;F
+38111 &+Gb@)F
+38138 Gnt#
+38186 Grt#
+38710 &;G~t
+39457 Gd@P
+39482 GdHP
+40013 &;G~u
+40362 ;Vt
+41977 NWPV
+41994 $DD^
+42216 $DD^
+42529 NWPV
+42570 $DD3
+42704 $DD3
+43089 >$DD
+43129 $DD3
+43640 PSQR
+43785 >ZWu<
+44092 ZY[X
+44104 0&DD
+44248 >dX@Br
+45330 &+G=
+45517 &+G=
+46430 &)G
+47294 DDRP
+48128 DDRP
+48282 X&;G
+48703 Y@;F
+50254 Y@;F
+52392 : F Q 
+53015 X&;G
+54411 ;Vu
+54566 \H;F
+54577 \H;F
+54894 ;F}
+59915 ;F|
+61741 "&DD
+61788 >$DD
+62581 >dX@Bv
+62596 dX@B
+62636 >dX@Bu
+63156 t=N
+63589 >$DD
+63736 R&DD
+65343 tQ=_
+65356 t,=j
+65379 t-=z
+65843 PSQR
+65874 `<.t
+65880 `<Ft
+65913 ]]_^
+65919 ZY[X
+65944 "&DD
+65955 0&DD
+66461 ^r!u
+66563 &;GT~
+67106 &+Gd
+67467 GT;F
+67612 GT;F
+68163 &;GT}<
+68716 &;GT
+69023 GX"^
+69306 &;GT}
+69377 W`J;
+69421 &)G`
+70459 &;GT}
+70685 t8=4
+70998 &;G`t!3
+71078 GV%@
+72276 &DDP
+72295 &DDZ;
+73840 d_t]
+73892 t_r'u
+75477 jZ;F
+76412 `HP3
+77111 `@P3
+77212 `HP3
+77786 a@P3
+77854 `@P3
+77922 a@P3
+77990 `@P3
+78090 Cb
+82018 <Z u
+82046 <ZPt
+88297 t=Y
+89571 t&=Y
+89939 DD+F
+89991 DD+F
+90839 arEu
+91433 t>=K
+91992 E$DD
+93981 ?Luv
+96800 t#= 
+97246 Ss
+97651 <Yu
+103079 G;V
+103084 u1;F
+104933 >b-<r$
+105237 ][&:E
+108553 ]&:E
+109219  +DB
+109700 r)w*
+110827 XC;^
+111245 [XC;^
+112168 <*u&
+112374 !C<?u
+114269 FGIu
+114549 FGIu
+115438 <t
+118606 BPSQ
+119085 ]&:E
+119613 DPSQR
+119678 ZY[X
+119835 +F@
+120206 +F@
+120436 +F@
+120655 +F@
+120868 +F@
+121136 +F@
+121420 +F@
+121657 [XIu
+122099 ]&:E
+122758 TB+V
+123304 TB+V
+123490 & %GKP
+123731 TB+V
+123999 TB+V
+124478 TB+V
+124759 TB+V
+125385 TB+V
+126624 +F@
+128260 ][&:E
+132199 ]LVW
+132209 M&&+M$A
+132221 }DFF
+132365 t Jt
+132380 'CJu
+132397 'CGGY
+134065 DP+F
+134324 FGGKu
+134437 GGKu
+134546 GGKu
+134654 GGKu
+134815 GGKu
+135011 DP+F
+135082 & %2F
+135187 FGKu
+135438 & %2F
+135921 X[GKK~%S
+136110 & =G
+136148 & =XGII~
+136158 & =G
+136169 & =X"f
+136333 TP+V
+136868 DP+F
+136939 & %2F
+137053 FGKu
+137359 & %2F
+137604 TP+V
+138189 TP+V
+139118 TP+V
+140065 ;D$r0;D&w+
+140164 DR)F
+140177 D*)F
+140212 ;D$rH;D&wCP
+140649 ;D$r0;D&w+
+140794 ;\$r
+140799 ;\&r
+140943 ;\$r
+140948 ;\&v
+140959 {+\$
+141028 DR+D.&
+142792 FP3
+142878 FP3
+143059 FP;v
+143186 FP3
+143274 FP3
+143359 FP;v
+143448 FP3
+143576 FP3
+143625 FP3
+143782 FP;~
+143914 FP3
+143963 FP3
+144115 FP;~
+144234 FP3
+144307 FP3
+144406 FP3
+144455 WF;v
+144480 FP3
+144663 FP;~
+144732 FP3
+144781 FP3
+144996 FP;~
+145065 FP3
+145114 FP3
+146361  A&;U
+146427 60IV
+146693 $0<HT`lx
+149159 @}P;
+149223 _[r6
+149438 x'Nt
+149609 @}7;
+149627 @}C@=
+150082 @}>=
+150677 _^]
+151754 t4+^
+151939 $"""""
+152199 WUUUUUU
+152212 23333
+152409 VWVWV
+152675 xUUUUUU
+152687 &#"""""
+152916 _^]
+152947 hUUUUUU
+152960 433333
+153149 VWRQSP
+153197 uVWW
+153255 tVV
+153624 @}8=
+153904 |WVW
+154290 RPSUVW
+154348 _^][XZ
+154449 _^][XZ6
+154763 |8-<
+154944 7!A!K!U!_!f!
+154979 "&"#"-","5"4"
+155106 RPSUVW
+155411 ` PSRQ
+155420 PSRQ
+155429 PSQ
+155437 PSRQ
+155445 PSRQ
+155849 $[$T$[$[$O$T$l$w$w$T$w$w$
+156159 %T%0%?%\%o%
+156454 _^][XZ
+156787 LtJ{H
+157523 ctg3
+158092 4>xK^]
+158314 |h;^
+158409 ;~u
+158467 +-K}
+158479 00=c
+158626 |h<+t
+158632 <-u5
+158693 <.t2<9w+<0r',0
+158906 <euR
+158927 YY<+t
+158957 YY<9w
+159185 |r<Nun
+159208 |[<FuW
+159251 |0<Au,
+159754 #X=D
+160654 v$YY
+160764 v$YY
+161130 F+6{
+161601 O!F
+162148 F@=
+162378 F@=
+163637 &)7V
+163661 GRP
+163817 _K&
+164329 _K&
+164556 ~/SQR
+165911 E$YY
+166370 E$YY
+166417 v$YY
+166494 E$YY
+166571 v$YY
+166588 v$YY
+167035 !r$RP
+167330 $'RP
+167879 _^]DD
+167955 &XZ[&:
+168297 $'RPW
+168314 F;v~
+168353 $'RP
+168376 F;v~
+168666 $'RP
+168677 $'RP
+169639 F;F
+170034 &YY3
+170059 $&YY
+170071 $&YY
+171002 P"v?
+171024 8"RP
+171048 8"RP
+171415 '&YY
+171442 $YY=
+171465 Lti
+171482 LtX
+171499 LtG
+171710 &YY3
+171754 Ltm
+171772 $YY=
+171978 wquj
+172356 Turbo-C - Copyright (c) 1988 Borland Intl.
+172399 Divide error
+172413 Abnormal program termination
+172508 product.pf
+172525 This disk appears to be damaged or some
+172569 files are missing.
+172593 Please check your disk, use your backup
+172639 or contact MECC.
+172659 This is a MECC Membership product copy that
+172704 has not been properly duplicated and registered.
+172755 Please use the MECC duplication program
+172796 to make working copies.
+172825 This is a MECC Demo product whose time
+172865 has run out.
+172880 Please call MECC to obtain
+172908 a legal copy.
+172926 PROGRAM IS NOT AVAILABLE
+172953 This product is licensed for use by a single computer
+173008 at a time.  It is currently being used by someone else
+173064 on the network.
+173082 Please try again later.
+173108 The network version of this program may be licensed
+173161 from MECC.  Please call MECC at %s for
+173201 details.
+173212 -- Press any key --
+173232     Press any key.
+173251 Not enough free memory.
+173275 Error: missing file
+173298     Press any key.
+173318     Please remove
+173336    write-protection
+173356     from the disk.
+173375 Please insert the disk.
+173399   The printer is out
+173420       of paper.
+173436      Disk error.
+173453    Critical error %d.
+173509  Multiples 
+173522  Factors 
+173533  Primes 
+173543  Equality 
+173555  Inequality 
+173569  Challenge 
+173684 MECC8x8.gft
+173696 MECC5x8.gft
+173740                                 
+174253 There are currently no entries in the
+174291 Hall of Fame.
+174306 Use arrows to move, Space Bar to delete.
+174347 Press Enter to accept changes.
+174378 Escape: Cancel changes
+174416 Erase Hall of Fame
+174448 There are no more entries in the
+174481 Hall of Fame.
+174519 Press Space Bar to continue.
+174580 .CFG
+174586     The specified file is not in MECC configuration format.
+174647     MECC configuration error. Could not open the specified file.
+174712 ConfInit1
+174730 nomouse
+174740 nm.cfg
+174747 nm.cfg
+174754 MECC
+174762 Do you really want to quit?
+174806 The Unknown Muncher
+174839 Congratulations!
+175016 Type your name, and press Enter.
+175050 Do you want to play 
+175071 Multiples
+175081 Factors
+175089 Primes
+175096 Equality
+175105 Inequality
+175116 Challenge
+175126  again?
+175135 You made it into the
+175156 Number Munchers Hall of Fame!
+175186 You have the Number Munchers
+175215 Hall of Fame best score!
+175240 A Number Munchers Hall of Fame
+175271 perfect score!!!
+175288 logo.004
+175297 logo.256
+175318 CGA.BGI
+175326 Unable to find necessary files.
+175359 Please start the program from the
+175394 Number Munchers directory.
+175423 GrafOpen
+175433 Error loading primes
+175454 resource.
+175465 Cannot run program.
+175485 No graphics hardware detected.
+175517 VGA256
+175525 Unable to find necessary files.
+175558 Please start the program from the
+175593 Number Munchers directory.
+175622 Version 
+175633 Network version is licensed to:
+175665 This product is licensed to:
+175698 nm.res
+175705 nmcga.res
+175715 ncga.res
+175725 --more--
+175856 Use Arrows to move, then press Enter.
+175897  Play Number Munchers 
+175920  Hall of Fame 
+175935  Information 
+175949  Options 
+175959  Quit 
+176234 Use Arrows to move, then press Enter.
+176272 Escape: 
+176281 Choose an option:
+176299 Options
+176382 Type entry, then press Enter.
+176412 Escape: Options Menu
+176435 That password is not correct.
+176466 Please try again.
+176486 Enter the password:
+176506 Type entry, then press Enter.
+176536 Escape: Main Menu
+176596 Set Password
+176609 Enter a new password:
+176631 Enter a hint:
+176646  Set Difficulty Level 
+176669  Set Content 
+176683  Erase Hall of Fame 
+176704  Set Password 
+176719  Turn Joystick ON  
+176739  Calibrate Joystick 
+176761 Main Menu
+176785 Configuration file
+176804 cannot be written, it
+176826 is write protected
+177036 pless than
+177047 pnot equal
+177058 pgreater than
+177110 4'Press SPACE BAR to continue
+177142 Yikes
+177148 Oops
+177153 Aargh
+177159 Oh, Oh
+177166 Rats
+177171 normalus
+177180 laborus
+177188 timidus
+177196 assistus
+177205 smarticus
+177215  is not a multiple of 
+177238  is not a factor of 
+177262 The number "
+177275 " is not prime.
+177291 Example: 
+177305 Oops!  "
+177316 ! You were eaten by a
+177338 Trogglus 
+177502 4'Improper diacritical type.
+177532 Trogg
+177542 Multiples of
+177555 Factors of
+177566 Prime Numbers
+177580 Equals
+177587 Less Than
+177597 Not Equal to
+177610 Greater Than
+177627 Score: 
+177635 Score: 
+177643 Score: 
+177651 Press a key for Muncher Menu
+177680 Press a key for Muncher Menu
+177709 Score: 
+177717 0000000
+177725 0000000
+177733 Score: 
+177741 Level: 
+177749 Demo
+177754 Time out
+177890   Which Number Munchers game would
+177925   you like to play?
+177962   Which Hall of Fame would
+177989   you like to see?
+178046 Use Arrows to move, then press Enter.
+178088 yYnN
+178190 NUMBER MUNCHERS
+178208 Hall of Fame
+178223 Multiples
+178233 Factors
+178241 Primes
+178248 Equality
+178257 Inequality
+178268 Challenge
+178280 There are no entries
+178301 in the Hall of Fame.
+178325 Perfect
+178333  Press Space Bar to continue.
+178363 Press a key for Muncher Menu
+178392 Press a key for Muncher Menu
+178421 Do you want instructions?
+178449 Press Space Bar to continue.
+178479  Yes 
+178485  No 
+178501 Attach joystick to computer.
+178564 Center your joystick.
+178588 Position your joystick: left
+178619 Position your joystick: right
+178651 Position your joystick: up
+178680 Position your joystick: down
+178711 Your joystick is ready for use.
+178744 Calibrate Joystick
+178763 Press Space Bar to continue.
+178792 Escape: Options Menu
+178814 pCallJob
+178823 pSeqKey
+178831 pSeqmouse
+178843 Z4'@
+178855 Z4'4
+178867 Location: LoadFont
+178890 Cursor allocation failed.
+179059  yes 
+179065  000 - 000 
+179077  in order 
+179088  up to 10 
+179101  yes 
+179107  000 - 000 
+179119  in order 
+179143  yes 
+179149  000 - 000
+179185  yes 
+179191  000 - 000 
+179203  in order 
+179227  yes 
+179233  000 - 000 
+179245  in order 
+179269  yes 
+180615 #4'##4'4#4'I#4'Z#4'o#4'
+180659 1234567890
+180670 Use Arrows to move, Space Bar to change.
+180711 Press Enter to accept changes.
+180742 Escape: Cancel changes
+180765 Type number, then press Enter.
+180796 Escape: Cancel changes
+180828 r 4's 4'
+180843 The low limit must be equal to
+180874 or less than the upper limit. 
+180907 At least one operation must be
+180938 set to "on".                  
+180974 O$4'P$4'V$4'\$4'b$4'h$4'F1: Help 
+181009 You have selected no games.     
+181042 Please select at least one game.
+181086 You are about to PERMANENTLY delete ALL
+181126 of the entries from ALL of the Hall of 
+181166 Fame lists.                            
+181207 Do you really want to do this?         
+181278  Erase ALL Lists 
+181309  3rd Grade Easy 
+181326  3rd Grade Advanced 
+181347  4th Grade Easy 
+181364  4th Grade Advanced 
+181385  5th Grade Easy 
+181402  5th Grade Advanced 
+181423  6th Grade Easy 
+181440  6th Grade Advanced 
+181461  7th Grade Easy 
+181478  7th Grade Advanced 
+181499  8th Grade and Above 
+181522 Modify Range:
+181536 Allowable range: 
+181558 Current lower limit:
+181579 Enter new lower limit:
+181602 Current upper limit: 
+181624 Enter new upper limit:
+181648  off 
+181654  off 
+181660  off 
+181666  off 
+181673 Modify Other:
+181687 Operation
+181701 Addition ( 
+181716 Subtraction ( 
+181734 Multiplication ( 
+181755 Division ( 
+181770  on 
+181775  off 
+181781 Set Content
+181793 Current Difficulty:
+181813 Game
+181818 Use 
+181823  Range 
+181831 Sequence 
+181841 Other
+181847 Multiples
+181857 Factors
+181865 Primes
+181872 Equality
+181881 Inequality
+181892 Challenge
+181902 Erase Hall of Fame: ALL lists
+181932 Use Arrows to move, then press Enter.
+181970 Escape: Cancel
+181986 Allowable range: 
+182010 The value entered      
+182034 must be in this range. 
+182059 Set Content Help
+182076 Use:  The games marked "yes" are       
+182116 currently available to use.  If more   
+182156 than one game is available, the player 
+182196 is given a choice of games to play.    
+182237 Range:  Changing these values can limit
+182277 or expand the variety of numbers the   
+182317 player will see.                       
+182358 Sequence:  When sequence is "in order,"
+182398 the key value displayed at the top of  
+182438 the game screen will increment by one  
+182478 for each new game screen.  When set to 
+182518 "random," a new key value is randomly  
+182558 selected within the target range.      
+182599 Other:  In Multiples, this column shows
+182639 which multiples of the key value are   
+182679 used.  In Equality and Inequality, this
+182719 column indicates which operations      
+182768  ) will be used.              
+182800 The highest munch-able number is 
+182851 Modify Other: Multiples
+182875 Current target range: 
+182902 Current max. multiplier: 
+182928 Enter the max. multiplier:
+182955 (Allowable range: 3 - 50)
+182981 Type number, then press Enter.
+183012 Escape: Set Content
+183033 New max. multiplier: 
+183055 Press Enter to accept.
+183078 Escape: Cancel change
+183101 Select Difficulty
+183119 Current Difficulty:
+183139 Choose a level:
+183155 Options Menu
+183168 Select Hall of Fame
+183188 Choose a Hall of Fame to erase:
+183220 Options Menu
+183233  yes 
+183239  no 
+183244  --- 
+183250     
+183255  in order 
+183266   random  
+183335 PCXF
+183340 BTMP
+183345 SCPT
+183350 GSND
+183355 ADLI
+183360 PSND
+183365 DATA
+183370 CONF
+183375 EGAT
+183382      Please insert
+183403 Number Munchers Disk 1.
+183427 Number Munchers Disk 2.
+183451 the Number Munchers disk.
+183477 Program exit, not enough memory to continue.
+183522 Program exit, not enough memory to continue.
+183568 Error expanding image.
+183986 pDoJobs
+183994 pFindJob
+184003 pAddJob1
+184012 pAddJob2
+184021 pSetEvent
+184031 pSetJob
+184040  PCX Programmer's Toolkit 3.55 Copyright (c) Genus Microprogramming, Inc. 1988-89 All Rights Reserved. Christopher A. Howard 
+186394 EMMXXXX
+186408 CGA 320x200x4       
+186464 CGA 640x200x2       
+186520 EGA 320x200x16      
+186576 EGA 640x200x16      
+186632 EGA 640x350x2       
+186688 EGA 640x350x16      
+186744 VGA 640x480x2       
+186800 VGA 640x480x16      
+186856 VGA 320x200x256     
+186912 Hercules 720x348x2  
+186968 Tseng 800x600x16    
+187024 Tseng 640x350x256   
+187079 Tseng 640x480x256   
+187136 Tseng 800x600x256   
+187192 Paradise 800x600x16 
+187248 Paradise 800x600x2  
+187304 Paradise 640x400x256
+187360 Paradise 640x480x256
+187416 Video7 800x600x16   
+187472 Video7 640x400x256  
+187528 Video7 640x480x256  
+187584 Video7 800x600x256  
+187684  PCX Text 1.02 Copyright (c) Genus Microprogramming, Inc. 1988-89 All Rights Reserved. Christopher A. Howard 
+188824 EMMXXXX
+190070 CGA 320x200x4       
+190110 CGA 640x200x2       
+190150 EGA 320x200x16      
+190190 EGA 640x200x16      
+190230 EGA 640x350x2       
+190270 EGA 640x350x16      
+190310 VGA 640x480x2       
+190350 VGA 640x480x16      
+190390 VGA 320x200x256     
+190430 Hercules 720x348x2  
+190470 Tseng 800x600x16    
+190510 Tseng 640x350x256   
+190549 Tseng 640x480x256   
+190590 Tseng 800x600x256   
+190630 Paradise 800x600x16 
+190670 Paradise 800x600x2  
+190710 Paradise 640x400x256
+190750 Paradise 640x480x256
+190790 Video7 800x600x16   
+190830 Video7 640x400x256  
+190870 Video7 640x480x256  
+190910 Video7 800x600x256  
+190974  PCX Effects 1.03 Copyright (c) Genus Microprogramming, Inc. 1988-89 All Rights Reserved. Christopher A. Howard 
+191103 Wipe                
+191129 Split               
+191155 Crush               
+191181 Slide               
+191207 Sand                
+191233 Drip                
+191259 Explode             
+191285 Diagonal            
+191311 Spiral              
+191337 Random              
+191525 K4'Domain
+191535 Denormal
+191544 Divide by 0
+191556 Overflow
+191565 Underflow
+191575 Partial loss of precision
+191601 Floating point error: %s.
+191834 sqrt
+191840 8L4'?L4'DL4'ML4'WL4']L4'DOMAIN
+191871 SING
+191876 OVERFLOW
+191885 UNDERFLOW
+191895 TLOSS
+191901 PLOSS
+191907 %s: %s error
+192051          !!!!!                  
+192084 @@@@@@@@@@@@@@@
+192109 @@@@@@@
+192142 @@@@@@
+192174 @@@@ 
+192752 print scanf : floating point formats not linked
+192804 (null)
+192811 0123456789ABCDEF
+192941 COMPAQ
+192997 c4'PF
+193141 TRIP
+193156 LITT
+193171 SANS
+193186 GOTH
+193201 SCRI
+193216 SIMP
+193231 TSCR
+193246 LCOM
+193261 EURO
+193276 BOLD
+193528 _RrR
+193664 EGAVGA
+193673 EGAVGA
+193690 IBM8514
+193699 IBM8514
+193716 HERC
+193725 HERC
+193768 PC3270
+193777 PC3270
+193898 xxxx
+193907 No Error
+194015 Bad Mode
+194055 No error
+194064 (BGI) graphics not installed
+194093 Graphics hardware not detected
+194124 Device driver file not found (
+194155 Invalid device driver file (
+194184 Not enough memory to load driver
+194217 Out of memory in scan fill
+194244 Out of memory in flood fill
+194272 Font file not found (
+194294 Not enough memory to load font
+194325 Invalid graphics mode for selected driver
+194367 Graphics error
+194382 Graphics I/O error
+194401 Invalid font file (
+194421 Invalid font number
+194441 Invalid Printer Initialize
+194468 Printer Module Not Linked
+194494 Invalid File Version Number
+194522 Graphics error (
+194543 BGI Error: Not in graphics mode
+194582 BGI Error: Graphics not initialized (use 'initgraph')
+194641 .BGI
+194646 .CHR

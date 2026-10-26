@@ -2,6 +2,7 @@ import type { Rng, TileVisual, Topic } from '../content/types';
 import type { Sprites } from '../engine/sprites';
 import type { Screen } from '../engine/screen';
 import { drawVisual } from '../engine/visuals';
+import { planOverlay } from '../ui/text-layout';
 import type { Action } from '../engine/input';
 import {
   DIFFICULTY_SPEED,
@@ -232,7 +233,7 @@ export class GameSession {
       this.lives -= 1;
       this.shake = 6;
       this.message = this.round.explain(cell.text);
-      this.prompt = 'Press SPACE to continue';
+      this.prompt = 'SPACE CONTINUE  ·  L LEARN';
       this.emit('wrong');
       if (this.lives <= 0) this.gameOver();
       else this.status = 'wrong';
@@ -338,7 +339,7 @@ export class GameSession {
     this.lives -= 1;
     this.shake = 10;
     this.message = `Yikes! You were eaten by a ${SPECIES_NAMES[hit.species]}.`;
-    this.prompt = 'Press SPACE to try again';
+    this.prompt = 'SPACE TRY AGAIN  ·  L LEARN';
     this.emit('death', hit.species);
     this.troggles = [];
     this.muncher.col = CENTER.col;
@@ -507,10 +508,16 @@ export class GameSession {
   }
 
   private drawOverlay(screen: Screen, pulse: number): void {
-    const w = 440;
-    const h = 132;
-    const x = (640 - w) / 2;
-    const y = 148;
+    // Messages can be long ("its angles are 100, 40 and 40 degrees, so ..."),
+    // so the panel is laid out from measured, wrapped lines and grows to fit.
+    const plan = planOverlay(this.message, (text, size) => screen.measure(text, size));
+    const w = plan.width;
+    const h = plan.height;
+    const x = Math.round((640 - w) / 2);
+    const minY = 58;
+    const maxY = 400 - 44 - h;
+    const y = Math.max(minY, Math.min(maxY, Math.round((400 - h) / 2)));
+
     screen.rect(0, 0, 640, 400, '#000010', 0.35);
     screen.panel(x, y, w, h, {
       fill: '#00004d',
@@ -518,14 +525,17 @@ export class GameSession {
       inner: '#3450ff',
     });
 
-    screen.text(this.message, 320, y + 22, {
-      size: 13,
-      color: '#ffffff',
-      align: 'center',
+    plan.lines.forEach((line, index) => {
+      screen.text(line, 320, y + 24 + index * plan.lineHeight, {
+        size: plan.size,
+        color: '#ffffff',
+        align: 'center',
+        baseline: 'top',
+      });
     });
 
     if (this.prompt) {
-      screen.text(this.prompt, 320, y + h - 26, {
+      screen.text(this.prompt, 320, y + h - 20, {
         size: 10,
         color: pulse > 0.5 ? '#ffd85a' : '#8a7a2a',
         align: 'center',

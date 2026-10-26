@@ -1,12 +1,14 @@
 import { buildCurriculum, practiceCurriculum, shuffleWithinGrades, topicForLevel } from '../content/curriculum';
 import { ALL_TOPICS, BANDS, FAMILY_COLORS, FAMILY_LABELS, findTopic, orderedTopics } from '../content/registry';
 import { createRng, randomSeed } from '../content/rng';
+import { lessonFor } from '../content/lessons';
 import { BAND_LABELS, type Band, type Topic } from '../content/types';
 import { Audio } from '../engine/audio';
 import type { Action, Input } from '../engine/input';
 import { Screen, VIEW_H, VIEW_W } from '../engine/screen';
 import type { Sprites } from '../engine/sprites';
 import { DIFFICULTY_LABELS, type DifficultyId } from '../game/rules';
+import { planLesson } from './lesson-view';
 import { GameSession, type SessionEvent } from '../game/session';
 
 const C = {
@@ -29,7 +31,7 @@ const STORAGE = {
   scores: 'nm.v2.scores',
 } as const;
 
-type ScreenId = 'menu' | 'topics' | 'options' | 'help' | 'scores' | 'play';
+type ScreenId = 'menu' | 'topics' | 'options' | 'help' | 'scores' | 'play' | 'lesson';
 
 interface Settings {
   band: Band;
@@ -76,9 +78,12 @@ export class App {
   private session: GameSession | null = null;
   private paused = false;
   private pauseIndex = 0;
+  private lessonTopic: Topic | null = null;
+  private lessonFrom: 'play' | 'topics' | 'menu' = 'menu';
 
   private stars: Array<{ x: number; y: number; s: number; c: string }> = [];
   private startedAt = performance.now();
+  private lastActions: Action[] = [];
   private lastFrame = performance.now();
 
   constructor(screen: Screen, input: Input, audio: Audio, sprites: Sprites) {
@@ -106,8 +111,14 @@ export class App {
       lives: this.session?.lives,
       level: this.session?.level,
       cells: this.session?.cells.map((c) => (c.eaten ? '' : c.text)),
+      tiles: this.session?.cells.map((c) => ({ text: c.text, correct: c.correct, eaten: c.eaten })),
       muncher: this.session?.muncherCell,
       troggles: this.session?.troggles.map((t) => t.species),
+      message: this.session?.message,
+      lastActions: this.lastActions,
+      prompt: this.session?.prompt,
+      heading: this.session?.round.heading,
+      topic: this.session?.topic.id,
     };
   }
 
@@ -133,6 +144,7 @@ export class App {
     const dt = Math.min(48, now - this.lastFrame);
     this.lastFrame = now;
     const actions = this.input.drain();
+    this.lastActions = actions;
     const pointer = this.input.takePointer();
     this.update(dt, actions, pointer);
     this.draw(now);
@@ -189,6 +201,39 @@ export class App {
       { label: 'HOW TO PLAY', hint: 'Controls and scoring', action: () => this.goto('help') },
       { label: 'OPTIONS', hint: 'Difficulty, band, sound', action: () => this.goto('options') },
     ];
+  }
+
+  private openLesson(topic: Topic, from: 'play' | 'topics' | 'menu'): void {
+    this.lessonTopic = topic;
+    this.lessonFrom = from;
+    this.screenId = 'lesson';
+    this.paused = false;
+    this.audio.play('select');
+    this.announce(`Lesson: ${topic.name}. ${lessonFor(topic).summary}`);
+  }
+
+  private closeLesson(): void {
+    if (this.lessonFrom === 'play' && this.session) {
+      this.screenId = 'play';
+      return;
+    }
+    this.screenId = this.lessonFrom === 'topics' ? 'topics' : 'menu';
+    this.lessonTopic = null;
+  }
+
+  private updateLesson(actions: Action[]): void {
+    for (const action of actions) {
+      if (action === 'cancel') {
+        this.closeLesson();
+        return;
+      }
+      if (action === 'confirm' || action === 'munch') {
+        const topic = this.lessonTopic;
+        this.lessonTopic = null;
+        if (topic) this.startRun('practice', topic);
+        return;
+      }
+    }
   }
 
   private quitToMenu(): void {
@@ -329,6 +374,10 @@ export class App {
         this.pauseIndex = 0;
         return;
       }
+      if (actions.includes('learn')) {
+        this.openLesson(this.session.topic, 'play');
+        return;
+      }
       const heldDir = this.heldDirection();
       if (pointer?.cell) this.session.pointTo(pointer.cell);
       this.session.update(dt, actions, heldDir);
@@ -340,6 +389,9 @@ export class App {
     }
 
     switch (this.screenId) {
+      case 'lesson':
+        this.updateLesson(actions);
+        return;
       case 'menu':
         this.updateMenu(actions, pointer);
         break;
@@ -456,6 +508,9 @@ export class App {
         this.topicIndex = 0;
         this.topicScroll = 0;
         this.audio.play('menu');
+      } else if (action === 'learn') {
+        const topic = orderedTopics(BANDS[this.bandIndex]!)[this.topicIndex];
+        if (topic) this.openLesson(topic, 'topics');
       } else if (action === 'confirm' || action === 'munch') {
         this.startSelectedTopic();
       } else if (action === 'cancel') {
@@ -573,6 +628,9 @@ export class App {
         break;
       case 'scores':
         this.drawScores(now);
+        break;
+      case 'lesson':
+        this.drawLesson(now);
         break;
       default:
         break;
@@ -702,9 +760,14 @@ export class App {
         align: 'center',
       });
     }
-    this.screen.text(`${this.topicIndex + 1} / ${list.length}`, 320, 370, {
+    this.screen.text(`${this.topicIndex + 1} / ${list.length}`, 320, 366, {
       size: 10,
       color: C.dim,
+      align: 'center',
+    });
+    this.screen.text('ENTER PLAY  ·  L LEARN  ·  ESC BACK', 320, 384, {
+      size: 8,
+      color: C.dimmer,
       align: 'center',
     });
   }
@@ -755,6 +818,7 @@ export class App {
       ['SCORING', 'Each correct munch is 5 points. Clear the board to advance; every 4th level is an interlude.'],
       ['LIVES', 'You start with 3. A wrong munch or a Troggle costs one.'],
       ['PAUSE', 'ESC pauses. ESC again, from the pause menu, returns to the main menu. M toggles sound.'],
+      ['LEARN', 'Got one wrong? Press L for a lesson on that topic, then come back and try again.'],
     ];
     let y = 74;
     for (const [key, text] of lines) {
@@ -805,21 +869,67 @@ export class App {
   private drawPause(now: number): void {
     void now;
     this.screen.rect(0, 0, VIEW_W, VIEW_H, '#000010', 0.55);
-    this.screen.panel(200, 140, 240, 120, { fill: C.panel, border: C.accent, inner: '#3450ff' });
-    this.screen.text('PAUSED', 320, 154, { size: 18, align: 'center', color: C.ink });
-    const items = ['RESUME', 'QUIT TO MENU'];
+    this.screen.panel(180, 120, 280, 156, { fill: C.panel, border: C.accent, inner: '#3450ff' });
+    this.screen.text('PAUSED', 320, 134, { size: 18, align: 'center', color: C.ink });
+    const items = ['RESUME', 'LEARN THIS TOPIC', 'QUIT TO MENU'];
     items.forEach((item, index) => {
       const selected = index === this.pauseIndex;
-      this.screen.text(`${selected ? '> ' : '  '}${item}`, 320, 190 + index * 28, {
+      this.screen.text(`${selected ? '> ' : '  '}${item}`, 320, 176 + index * 24, {
         size: 13,
         align: 'center',
         color: selected ? C.yellow : C.dim,
       });
     });
-    this.screen.text('ENTER SELECT  ·  ESC QUIT TO MENU', 320, 246, {
+    this.screen.text('ENTER SELECT  ·  L LEARN  ·  ESC QUIT', 320, 254, {
       size: 8,
       align: 'center',
       color: C.dimmer,
+    });
+  }
+
+  private drawLesson(now: number): void {
+    void now;
+    const topic = this.lessonTopic;
+    if (!topic) return;
+    const lesson = lessonFor(topic);
+    const plan = planLesson(lesson, (text, size) => this.screen.measure(text, size), {
+      maxWidth: 488,
+      maxHeight: 288,
+    });
+
+    this.screen.panel(40, 18, 560, 356, { fill: C.panel, border: C.accent, inner: '#3450ff' });
+    this.screen.text(topic.name.toUpperCase(), 320, 30, { size: 19, align: 'center', color: C.ink });
+    this.screen.text(
+      `${FAMILY_LABELS[topic.family].toUpperCase()}  ·  ${topic.grades.toUpperCase()}`,
+      320,
+      55,
+      { size: 8, align: 'center', color: FAMILY_COLORS[topic.family] },
+    );
+
+    let y = 74;
+    for (const block of plan.blocks) {
+      this.screen.text(block.header, 64, y, { size: 9, color: C.yellow });
+      this.screen.rect(64, y + 11, 512, 1, '#1b2fb5');
+      y += 16;
+      for (const line of block.lines) {
+        const isAnswer = line.startsWith('Answer:');
+        this.screen.text(line, 64, y, {
+          size: plan.size,
+          color: isAnswer ? C.green : C.ink,
+        });
+        y += plan.lineHeight;
+      }
+      y += 9;
+    }
+
+    if (plan.overflow) {
+      this.screen.text('MORE IN THE DOCS', 320, 352, { size: 8, align: 'center', color: C.orange });
+    }
+
+    this.screen.text('ENTER PLAY THIS TOPIC  ·  ESC BACK', 320, 362, {
+      size: 8,
+      align: 'center',
+      color: C.dim,
     });
   }
 

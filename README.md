@@ -47,6 +47,7 @@ sharing: `http://localhost:3000/?topic=function-families`.
 | --- | --- |
 | Move | Arrows or WASD (hold to keep moving) |
 | Munch | Space or Enter |
+| Learn | L (lesson for the current topic) |
 | Walk to a cell | Click / tap it |
 | Pause | Esc (Esc again quits to the menu) |
 | Mute | M |
@@ -81,6 +82,9 @@ is unfair or the tile text won't fit.
 
 - 6x5 board, 30 tiles, 8-12 of them correct.
 - 5 points per correct munch. A wrong munch costs a life and explains itself.
+- Press **L** on any wrong answer (or in the pause menu / topic picker) to open
+  a lesson page for that topic: what it is, how to do it, a worked example,
+  and a tip. Escape returns you to where you were.
 - 3 lives. A Troggle costs one too.
 - Clear every correct tile to advance. Every fourth level is an interlude.
 - Troggles get faster and more numerous; species unlock as you go.

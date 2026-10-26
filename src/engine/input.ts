@@ -2,7 +2,17 @@
  * Input layer: normalises keyboard, pointer and touch into a small set of
  * semantic actions the app polls each frame.
  */
-export type Action = 'up' | 'down' | 'left' | 'right' | 'confirm' | 'cancel' | 'munch' | 'pause' | 'mute';
+export type Action =
+  | 'up'
+  | 'down'
+  | 'left'
+  | 'right'
+  | 'confirm'
+  | 'cancel'
+  | 'munch'
+  | 'pause'
+  | 'mute'
+  | 'learn';
 
 const KEY_MAP: Record<string, Action> = {
   ArrowUp: 'up',
@@ -18,6 +28,7 @@ const KEY_MAP: Record<string, Action> = {
   Space: 'munch',
   Escape: 'cancel',
   KeyP: 'pause',
+  KeyL: 'learn',
   KeyM: 'mute',
   Backspace: 'cancel',
 };

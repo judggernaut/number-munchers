@@ -154,7 +154,7 @@ const trianglePictures: Topic = {
         const detail = angleMode
           ? `its angles are ${a}, ${b} and ${c} degrees`
           : `it has ${new Set(tile.angles).size} distinct angles, so ${new Set(tile.angles).size === 1 ? 'all' : new Set(tile.angles).size === 2 ? 'two' : 'no'} sides are equal`;
-        return `${detail[0]!.toUpperCase()}${detail.slice(1)}, so it is ${actual}, not ${target}.`;
+        return `${detail[0]!.toUpperCase()}${detail.slice(1)}; it is ${actual}, not ${target}.`;
       },
     });
   },

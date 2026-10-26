@@ -131,6 +131,26 @@ export interface Round {
   explain(text: string): string;
 }
 
+/** A worked example for the in-game lesson page. */
+export interface LessonExample {
+  /** The prompt the player would see, e.g. "Munch every factor of 36." */
+  prompt: string;
+  /** A tile that satisfies it. */
+  answer: string;
+  /** Why that answer is right, in one or two short sentences. */
+  why: string;
+}
+
+/** Everything the "Learn" page shows for one topic. */
+export interface Lesson {
+  /** What the topic is about, 1-3 short sentences. */
+  summary: string;
+  /** 2-4 ordered how-to steps. */
+  steps: string[];
+  example: LessonExample;
+  tip?: string;
+}
+
 export interface Topic {
   /** Stable kebab-case id, persisted in save data. */
   id: string;

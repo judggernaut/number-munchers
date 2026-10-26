@@ -115,6 +115,31 @@ Topic tests treat visual tiles specially: width/ASCII rules apply only to text
 the player reads, and determinism is compared by sampling the plotted function
 rather than by function identity.
 
+## Text that must not escape
+
+There is no HTML reflow inside the canvas, so long strings are dangerous: a
+cubic-function explanation is 78 characters, a Pythagorean worked solution is
+longer. `src/ui/text-layout.ts` owns all of it:
+
+- `wrapToWidth` wraps words and hard-breaks tokens wider than the box
+  (formulas like `x^3-2x^2+11x-12` have no spaces).
+- `layoutText` tries a list of font sizes, largest first, and reports
+  `overflow` when even the smallest fails.
+- `planOverlay` turns a message into `{ lines, size, height }`; the panel grows
+  to fit instead of the text leaving the frame.
+
+`planLesson` does the same for lesson pages and drops trailing blocks as a last
+resort. Tests assert that every real `explain()` message from all 57 topics fits
+the popup, so content cannot regress this.
+
+## Lessons
+
+Every topic has a `Lesson` (`summary`, `steps`, `example`, `tip`). Authored copy
+lives in `src/content/lessons-data.ts`; `lessonFor()` falls back to a generated
+page built from the topic blurb and a live round, so a new topic is never
+linkless. The page is reachable from a wrong answer (`L`), the pause menu, and
+the topic picker.
+
 ## Level flow
 
 `GameSession` owns one run. A `roundFor(level)` callback decides which topic
