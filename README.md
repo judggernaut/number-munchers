@@ -1,83 +1,112 @@
-# Number Muncher
+# Number Munchers
 
-This is an attempt to remake the original 
-[MECC DOS Number Munchers (Version 1.1)](http://mecc.co/mathematics/number-munchers---a-170/).
-An online emulator can be 
-[found here](https://playold.games/play-game/number-munchers/play/), which is
-where images/gameplay/etc. was gathered and backwards engineered. You can play a 
-deployed version of this game 
-[hosted on GitHub](https://msaperst.github.io/number-munchers/)
+A modernized fork of [msaperst/number-munchers](https://github.com/msaperst/number-munchers):
+the MECC classroom classic, rebuilt on a canvas engine with an extensible
+curriculum that now runs from grade 3 arithmetic through high-school algebra,
+geometry, trigonometry, statistics, and pre-calculus.
 
-## Development
-This project was bootstrapped with 
-[Create React App](https://github.com/facebook/create-react-app).
+Eat the tiles that answer the prompt. Avoid the ones that don't. Avoid the
+Troggles.
 
-### Available Scripts
-In the project directory, you can run:
-#### `npm ci`
-to install. alternatively, to clean the project before install
-#### `npm install`
-To run and launch the application:
-#### `npm start`
-This will launch the app in your browser, or you can open
-[http://localhost:3000](http://localhost:3000) to view it in your browser
+## Why a new version
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+The upstream fork nailed the *feel* of the original in React/DOM, but it left
+the game loop on scaffolding: a fixed 4-second Troggle tick marked
+`// TODO - make this go faster based on the level/troggle`, a single Troggle
+species (`normalus`), and six fixed categories. This fork keeps the lineage and
+rebuilds the parts that were placeholders:
 
-#### `npm test`
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Area | Upstream | Here |
+| --- | --- | --- |
+| Rendering | DOM grid + CSS | 640x400 canvas, pixel-perfect upscaling |
+| Stack | Create React App | Vite + TypeScript (strict), zero runtime deps |
+| Troggles | one species, fixed ramp | five species with distinct AI, level-scaled tick and spawns |
+| Content | 4 generators x 11 difficulty grades | 57 topics across 7 subject families, grade-banded |
+| Tile types | text only | text, function graphs, and drawn geometric figures |
+| Tests | Jest + Enzyme + Selenium | Vitest, pure generators, board invariants, AI behaviour |
+| Input | keyboard + swipe | keyboard, hold-to-move, click/tap-to-walk, touch |
+| Audio | none | WebAudio square-wave SFX, mutable |
 
-Note: you can also run `npm run test:ci` in order to run the 
-tests without watch mode
+## Quick start
 
-#### `npm run build`
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install
+npm run dev        # http://localhost:3000
+npm run test:run   # unit + content invariants
+npm run build      # typecheck + production bundle in dist/
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Node 22+ recommended. Any topic can be opened directly for lesson prep or
+sharing: `http://localhost:3000/?topic=function-families`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Controls
 
-#### `npm run deploy`
+| Action | Keys |
+| --- | --- |
+| Move | Arrows or WASD (hold to keep moving) |
+| Munch | Space or Enter |
+| Walk to a cell | Click / tap it |
+| Pause | Esc (Esc again quits to the menu) |
+| Mute | M |
 
-Deploys the application to our GitHub server. This is 
-automatically run when code is merged into `main`
+## Curriculum
 
-#### `npm run eject`
+Topics are grouped into three bands; a curriculum run stays inside the band you
+pick and walks it in grade order. `Choose Topic` pins a single skill.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+| Family | Sample topics |
+| --- | --- |
+| Number sense | primes, factors, multiples, even/odd, perfect squares, divisibility |
+| Arithmetic | equality, inequality, place value, rounding, equivalent fractions, fractions↔decimals, percents, integers, order of operations, exponents & roots |
+| Algebra | evaluate expressions, solve linear equations, linear inequalities, slope, systems, polynomial operations, factoring, quadratic roots, exponent rules, function values, sequences, logarithms, **function families from graphs**, **graph features** |
+| Geometry | angle relationships, triangle classification (numbers and pictures), Pythagorean theorem, area & perimeter, circles, volume & surface area, coordinate geometry, polygons, similar figures, circle theorems, 2D vs 3D shapes, solid properties |
+| Trigonometry | trig ratios, special angles, identities, radians & degrees |
+| Statistics | mean/median/mode, probability, counting, percent change, range & IQR, unit rates |
+| Pre-calculus | transformations, limits, derivatives, series & summation |
 
-If you aren’t satisfied with the build tool and configuration choices, 
-you can `eject` at any time. This command will remove the single build 
-dependency from your project.
+Some topics draw instead of writing: `Function Families` shows plots to
+identify (linear, quadratic, cubic, exponential, logarithmic, reciprocal,
+square root, absolute value, sine), `Solids vs Flat Shapes` shows 2D figures and
+3D solids, and `Triangle Pictures` draws triangles from their real angles with
+equality tick marks and a right-angle square.
 
-Instead, it will copy all the configuration files and the transitive 
-dependencies (webpack, Babel, ESLint, etc) right into your project so you have 
-full control over them. All of the commands except `eject` will still work, 
-but they will point to the copied scripts so you can tweak them. At this point
-you’re on your own.
+Adding a topic is one object in one file:
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) walks through it, and
+`src/content/__tests__/content.test.ts` will tell you immediately if the board
+is unfair or the tile text won't fit.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for 
-small and middle deployments, and you shouldn’t feel obligated to use this 
-feature. However we understand that this tool wouldn’t be useful if you 
-couldn’t customize it when you are ready for it.
+## How it plays
 
-## Testing
-Functional tests exist, and can be run using the
-#### `npm run selenium`
-command. These will execute Selenium tests on the application deployed on 
-localhost. Alternatively, a different address can be provided to test on another
-environment. For example, to test in prod:
-#### `APP=https://msaperst.github.io/number-munchers/ npm run selenium`
+- 6x5 board, 30 tiles, 8-12 of them correct.
+- 5 points per correct munch. A wrong munch costs a life and explains itself.
+- 3 lives. A Troggle costs one too.
+- Clear every correct tile to advance. Every fourth level is an interlude.
+- Troggles get faster and more numerous; species unlock as you go.
 
-## Docker
-A docker container can be build from this code to run/play the app on. To
-build the docker container run the below command
-#### `docker build -t number-munchers .`
+Troggle roster: **Reggie** wanders, **Worker** never turns, **Smarty** chases,
+**Bashful** flees, **Helper** meanders.
 
-To run the container run the below command
-#### `docker run --rm -it -p 80:80 number-munchers`
-And then navigate to http://localhost/ to use the app
+## Project layout
+
+```
+src/engine   canvas, input, audio, sprites   (game-agnostic)
+src/game     rules, troggle AI, session      (the munchers rules)
+src/content  topic generators + registry     (pure, seeded, tested)
+src/ui       menus, topic picker, options    (screen router)
+docs/re      reverse-engineering notes on the 1990 original
+```
+
+## Research
+
+Mechanics were checked against the 1990 DOS release with static analysis
+(REA + Ghidra). Numbers that are grounded in the binary are documented in
+[`docs/re/original-analysis.md`](re/original-analysis.md); the rest are marked
+as design choices in `src/game/rules.ts`.
+
+## License and attribution
+
+Code: Apache-2.0 (inherited from the upstream fork). See
+[`LICENSE`](LICENSE) and [`CREDITS.md`](CREDITS.md).
+
+*Number Munchers* is © MECC / SoftKey. This is an independent, non-commercial
+homage; no original game binaries, disk images, or resource files are included.

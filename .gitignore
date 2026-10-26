@@ -1,27 +1,18 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-.idea
-dependency-check-bin
-dependency-check-reports
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
+node_modules/
+dist/
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+coverage/
+*.local
+.vite/
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-/lint-results.sarif
+# Local reference material: original game binaries are never committed
+ref/
+*.EXE
+*.RES
+*.DSK
+
+# Reverse-engineering scratch: Ghidra projects, unpacked binaries, extracted assets
+tools/re/nm-snap/
+tools/re/out/
+tools/re/unlzexe
+tools/re/*.EXE

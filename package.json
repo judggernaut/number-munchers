@@ -1,76 +1,22 @@
 {
   "name": "number-munchers",
-  "homepage": "http://msaperst.github.io/number-munchers",
-  "version": "0.1.0",
-  "jest": {
-    "coverageThreshold": {
-      "global": {
-        "branches": 95,
-        "lines": 95
-      }
-    },
-    "coverageReporters": [
-      "lcov",
-      "text",
-      "cobertura"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!**/index.jsx",
-      "!src/__tests__/**/*.{js,jsx,ts,tsx}"
-    ]
-  },
-  "jest-junit": {
-    "suiteName": "jest tests",
-    "output": "junit.xml"
-  },
+  "version": "2.0.0",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.15.0",
-    "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^17.0.2",
-    "react-dom": "17.0.2",
-    "react-scripts": "5.0.1",
-    "react-swipeable": "^6.2.0",
-    "web-vitals": "^2.1.2"
-  },
+  "type": "module",
+  "description": "Number Munchers, modernized: a canvas-based remake of the MECC classic with an extensible K-12 math curriculum.",
+  "homepage": "https://judggernaut.github.io/number-munchers/",
+  "license": "Apache-2.0",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --coverage --testPathIgnorePatterns __tests__",
-    "test:ci": "react-scripts test --coverage --watchAll=false --testPathIgnorePatterns __tests__",
-    "selenium": "jest src/__tests__/*.js",
-    "lint": "eslint ./src/ -f @microsoft/eslint-formatter-sarif -o lint-results.sarif",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@microsoft/eslint-formatter-sarif": "^3.0.0",
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.5",
-    "chromedriver": "^128.0.1",
-    "enzyme": "^3.11.0",
-    "eslint": "^9.9.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-react": "^7.35.0",
-    "geckodriver": "^4.4.3",
-    "gh-pages": "^5.0.0",
-    "jest-junit": "^13.0.0",
-    "prettier": "^3.3.3",
-    "selenium-webdriver": "^4.23.0"
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.0.0"
   }
 }
