@@ -1,29 +1,50 @@
 import type { Rng } from '../content/types';
 
 /**
- * Troggle AI.
+ * Troggle AI, aligned with the behaviour recovered from the original NM.EXE
+ * (see docs/re/original-analysis.md).
  *
- * Five species, each with one readable movement idea (mirroring the original
- * roster: Reggie, Worker, Smarty, Bashful, Helper). All rules are pure
- * functions of position + direction + RNG so they are deterministic in tests.
+ * Five species:
+ *   normalus  - walks straight, turns only when blocked
+ *   laborus   - mostly straight, sometimes side-steps; re-rolls the tile it leaves
+ *   timidus   - flees when the Muncher is within ~96 px, otherwise wanders
+ *   assistus  - same movement as laborus; erases the tile it leaves
+ *   smarticus - turns toward the Muncher within 96 px, 50/50 within 192 px,
+ *               walks straight beyond that
+ *
+ * All rules are pure functions of position + direction + RNG.
  */
-export type TroggleSpecies = 'reggie' | 'worker' | 'smarty' | 'bashful' | 'helper';
+export type TroggleSpecies = 'normalus' | 'laborus' | 'timidus' | 'assistus' | 'smarticus';
 
+/** Species names as the game announces them. */
 export const SPECIES_NAMES: Record<TroggleSpecies, string> = {
-  reggie: 'Reggulus randomus',
-  worker: 'Trogglus laborus',
-  smarty: 'Trogglus smartus',
-  bashful: 'Trogglus timidus',
-  helper: 'Trogglus helpus',
+  normalus: 'Trogglus normalus',
+  laborus: 'Trogglus laborus',
+  timidus: 'Trogglus timidus',
+  assistus: 'Trogglus assistus',
+  smarticus: 'Trogglus smarticus',
+};
+
+/** Friendly nicknames used in menus and lessons. */
+export const SPECIES_NICKNAMES: Record<TroggleSpecies, string> = {
+  normalus: 'Reggie',
+  laborus: 'Worker',
+  timidus: 'Bashful',
+  assistus: 'Helper',
+  smarticus: 'Smarty',
 };
 
 export const SPECIES_COLORS: Record<TroggleSpecies, string> = {
-  reggie: '#ff5a5a',
-  worker: '#ffb347',
-  smarty: '#b06bff',
-  bashful: '#5ad2ff',
-  helper: '#7dff7d',
+  normalus: '#ff5a5a',
+  laborus: '#ffb347',
+  smarticus: '#b06bff',
+  timidus: '#5ad2ff',
+  assistus: '#7dff7d',
 };
+
+/** One cell is 64 px, so the original 96 px / 192 px radii are ~1.5 / ~3 cells. */
+export const CHASE_RADIUS = 2;
+export const FAR_RADIUS = 4;
 
 export interface Vec {
   dc: number;
@@ -74,17 +95,99 @@ const advance = (t: { col: number; row: number }, dir: Vec): Cell => ({
 
 const manhattan = (a: Cell, b: Cell): number => Math.abs(a.col - b.col) + Math.abs(a.row - b.row);
 
-/**
- * One step for one troggle. Returns a new troggle; if every neighbouring cell
- * is off-board (impossible on a 6x5 board, but defensive) it stays put.
- */
-export function stepTroggle(t: Troggle, ctx: WalkContext, now = 0): Troggle {
-  const valid = DIRS.filter((dir) => isInside(advance(t, dir), ctx));
-  if (valid.length === 0) return { ...t };
+const reverse = (dir: Vec): Vec => ({ dc: -dir.dc, dr: -dir.dr });
 
-  const forwardOk = valid.find((dir) => sameVec(dir, t.dir));
-  const next = chooseDir(t, valid, forwardOk ?? null, ctx);
+/** Perpendicular turns, the original's only alternative to going straight. */
+const sideSteps = (dir: Vec): Vec[] => [
+  { dc: dir.dr, dr: -dir.dc },
+  { dc: -dir.dr, dr: dir.dc },
+];
+
+/** Decide the next direction. Returns the current direction when wedged. */
+function chooseDirection(t: Troggle, ctx: WalkContext): Vec {
+  const { rng } = ctx;
+  const valid = DIRS.filter((dir) => isInside(advance(t, dir), ctx));
+  if (valid.length === 0) return t.dir;
+
+  const forwardOk = valid.some((dir) => sameVec(dir, t.dir));
+  const distance = manhattan(t, ctx.muncher);
+
+  const usable = (dirs: Vec[]): Vec[] => dirs.filter((dir) => valid.some((v) => sameVec(v, dir)));
+
+  switch (t.species) {
+    case 'normalus': {
+      // Straight until something blocks it, then a side-step or a turnaround.
+      if (forwardOk) return t.dir;
+      const sides = usable(sideSteps(t.dir));
+      if (sides.length > 0) return rng.pick(sides);
+      const back = usable([reverse(t.dir)]);
+      return back[0] ?? rng.pick(valid);
+    }
+
+    case 'laborus':
+    case 'assistus': {
+      // 80% straight, 20% side-step (matches the original's asymmetry).
+      if (forwardOk && rng.chance(0.8)) return t.dir;
+      const sides = usable(sideSteps(t.dir));
+      const options = forwardOk ? sides : [...sides, reverse(t.dir)];
+      const pool = options.filter((dir) => isInside(advance(t, dir), ctx));
+      if (pool.length === 0) return t.dir;
+      return rng.pick(pool);
+    }
+
+    case 'timidus': {
+      // Flee inside the danger radius, wander (with reversals) outside it.
+      if (distance <= CHASE_RADIUS) {
+        // Fleeing may require a reversal, so every direction is allowed.
+        let best = valid[0]!;
+        let bestScore = -Infinity;
+        for (const dir of valid) {
+          const score =
+            manhattan(advance(t, dir), ctx.muncher) + (sameVec(dir, t.dir) ? 0.25 : 0);
+          if (score > bestScore) {
+            bestScore = score;
+            best = dir;
+          }
+        }
+        return best;
+      }
+      if (forwardOk && rng.chance(0.8)) return t.dir;
+      const back = reverse(t.dir);
+      const pool = usable([back, ...sideSteps(t.dir)]);
+      return pool.length > 0 ? rng.pick(pool) : rng.pick(valid);
+    }
+
+    case 'smarticus': {
+      // Close: always home in. Mid: coin flip. Far: straight line.
+      const chase = (): Vec => {
+        // Homing may reverse; ties prefer the current heading.
+        let best = valid[0]!;
+        let bestScore = Infinity;
+        for (const dir of valid) {
+          const score =
+            manhattan(advance(t, dir), ctx.muncher) + (sameVec(dir, t.dir) ? -0.25 : 0);
+          if (score < bestScore) {
+            bestScore = score;
+            best = dir;
+          }
+        }
+        return best;
+      };
+      if (distance <= CHASE_RADIUS) return chase();
+      if (distance <= FAR_RADIUS && rng.chance(0.5)) return chase();
+      if (forwardOk) return t.dir;
+      return chase();
+    }
+
+    default:
+      return forwardOk ? t.dir : rng.pick(valid);
+  }
+}
+
+export function stepTroggle(t: Troggle, ctx: WalkContext, now = 0): Troggle {
+  const next = chooseDirection(t, ctx);
   const target = advance(t, next);
+  if (!isInside(target, ctx)) return { ...t };
 
   return {
     ...t,
@@ -95,57 +198,6 @@ export function stepTroggle(t: Troggle, ctx: WalkContext, now = 0): Troggle {
     dir: next,
     steppedAt: now,
   };
-}
-
-function chooseDir(t: Troggle, valid: Vec[], forward: Vec | null, ctx: WalkContext): Vec {
-  const { rng } = ctx;
-  switch (t.species) {
-    case 'worker': {
-      // Never turns voluntarily: bounces off walls, otherwise keeps going.
-      if (forward) return forward;
-      return { dc: -t.dir.dc, dr: -t.dir.dr };
-    }
-    case 'smarty': {
-      // Greedy chase, never doubles back unless trapped.
-      const candidates = valid.filter((dir) => !sameVec(dir, { dc: -t.dir.dc, dr: -t.dir.dr }));
-      const pool = candidates.length > 0 ? candidates : valid;
-      let best = pool[0]!;
-      let bestScore = Infinity;
-      for (const dir of pool) {
-        const score = manhattan(advance(t, dir), ctx.muncher) + (forward && sameVec(dir, forward) ? -0.25 : 0);
-        if (score < bestScore) {
-          bestScore = score;
-          best = dir;
-        }
-      }
-      return best;
-    }
-    case 'bashful': {
-      // Maximise distance from the muncher.
-      let best = valid[0]!;
-      let bestScore = -Infinity;
-      for (const dir of valid) {
-        const score = manhattan(advance(t, dir), ctx.muncher);
-        if (score > bestScore) {
-          bestScore = score;
-          best = dir;
-        }
-      }
-      return best;
-    }
-    case 'helper': {
-      // Aimless but persistent: usually continues, occasionally sideslips.
-      if (forward && rng.chance(0.78)) return forward;
-      return rng.pick(valid);
-    }
-    case 'reggie':
-    default: {
-      // Random walk with momentum: continue unless it hits a wall.
-      if (forward && rng.chance(0.65)) return forward;
-      const pool = valid.filter((dir) => !sameVec(dir, forward ?? { dc: 0, dr: 0 }));
-      return rng.pick(pool.length > 0 ? pool : valid);
-    }
-  }
 }
 
 /** Spawn a troggle on a random edge cell, facing inward. */
@@ -188,3 +240,7 @@ export function spawnAtEdge(
 export function collides(t: Troggle, muncher: Cell): boolean {
   return t.col === muncher.col && t.row === muncher.row;
 }
+
+/** Species whose passage changes the board underneath them. */
+export const rerollsTiles = (species: TroggleSpecies): boolean => species === 'laborus';
+export const erasesTiles = (species: TroggleSpecies): boolean => species === 'assistus';

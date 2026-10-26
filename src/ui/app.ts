@@ -7,8 +7,15 @@ import { Audio } from '../engine/audio';
 import type { Action, Input } from '../engine/input';
 import { Screen, VIEW_H, VIEW_W } from '../engine/screen';
 import type { Sprites } from '../engine/sprites';
-import { DIFFICULTY_LABELS, type DifficultyId } from '../game/rules';
+import {
+  DIFFICULTY_LABELS,
+  RULESETS,
+  rulesetFor,
+  type DifficultyId,
+  type RulesetId,
+} from '../game/rules';
 import { planLesson } from './lesson-view';
+import { wrapToWidth } from './text-layout';
 import { drawVisual } from '../engine/visuals';
 import { GameSession, type SessionEvent } from '../game/session';
 
@@ -32,11 +39,12 @@ const STORAGE = {
   scores: 'nm.v2.scores',
 } as const;
 
-type ScreenId = 'menu' | 'topics' | 'options' | 'help' | 'scores' | 'play' | 'lesson';
+type ScreenId = 'menu' | 'topics' | 'options' | 'help' | 'scores' | 'play' | 'lesson' | 'briefing';
 
 interface Settings {
   band: Band;
   difficulty: DifficultyId;
+  ruleset: RulesetId;
   muted: boolean;
 }
 
@@ -54,9 +62,15 @@ interface MenuItem {
   action: () => void;
 }
 
-const DEFAULT_SETTINGS: Settings = { band: 'elementary', difficulty: 'normal', muted: false };
+const DEFAULT_SETTINGS: Settings = {
+  band: 'elementary',
+  difficulty: 'normal',
+  ruleset: 'modern',
+  muted: false,
+};
 
 const DIFFICULTIES: DifficultyId[] = ['chill', 'normal', 'fast'];
+const RULESET_IDS: RulesetId[] = ['modern', 'original'];
 
 export class App {
   private readonly screen: Screen;
@@ -80,7 +94,7 @@ export class App {
   private paused = false;
   private pauseIndex = 0;
   private lessonTopic: Topic | null = null;
-  private lessonFrom: 'play' | 'topics' | 'menu' = 'menu';
+  private lessonFrom: 'play' | 'topics' | 'menu' | 'briefing' = 'menu';
 
   private stars: Array<{ x: number; y: number; s: number; c: string }> = [];
   private startedAt = performance.now();
@@ -99,6 +113,7 @@ export class App {
     if (import.meta.env.DEV) {
       // Dev-only inspection hook for automated play-testing.
       (window as unknown as { __nm?: unknown }).__nm = this;
+      (window as unknown as { __nmInterlude?: () => void }).__nmInterlude = () => this.session?.debugInterlude();
     }
   }
 
@@ -204,7 +219,7 @@ export class App {
     ];
   }
 
-  private openLesson(topic: Topic, from: 'play' | 'topics' | 'menu'): void {
+  private openLesson(topic: Topic, from: 'play' | 'topics' | 'menu' | 'briefing'): void {
     this.lessonTopic = topic;
     this.lessonFrom = from;
     this.screenId = 'lesson';
@@ -218,8 +233,30 @@ export class App {
       this.screenId = 'play';
       return;
     }
+    if (this.lessonFrom === 'briefing' && this.session) {
+      this.screenId = 'briefing';
+      return;
+    }
     this.screenId = this.lessonFrom === 'topics' ? 'topics' : 'menu';
     this.lessonTopic = null;
+  }
+
+  private updateBriefing(actions: Action[]): void {
+    for (const action of actions) {
+      if (action === 'confirm' || action === 'munch') {
+        this.screenId = 'play';
+        return;
+      }
+      if (action === 'learn' && this.session) {
+        this.openLesson(this.session.topic, 'briefing');
+        return;
+      }
+      if (action === 'cancel') {
+        this.session = null;
+        this.screenId = 'topics';
+        return;
+      }
+    }
   }
 
   private updateLesson(actions: Action[]): void {
@@ -275,13 +312,14 @@ export class App {
       sprites: this.sprites,
       rng,
       difficulty: this.settings.difficulty,
+      rules: rulesetFor(this.settings.ruleset),
       onEvent: (event) => this.handleSessionEvent(event),
       roundFor: (level) => {
         const current = topicForLevel(pool, level);
         return { topic: current, round: current.round(rng, level) };
       },
     });
-    this.screenId = 'play';
+    this.screenId = 'briefing';
     this.paused = false;
     this.pauseIndex = 0;
     this.announce(`${this.session.topic.name}. ${this.session.round.instruction}`);
@@ -392,6 +430,9 @@ export class App {
     switch (this.screenId) {
       case 'lesson':
         this.updateLesson(actions);
+        return;
+      case 'briefing':
+        this.updateBriefing(actions);
         return;
       case 'menu':
         this.updateMenu(actions, pointer);
@@ -533,9 +574,9 @@ export class App {
     actions: Action[],
     pointer: { x: number; y: number } | null,
   ): void {
-    const rows = 5;
+    const rows = 6;
     if (pointer) {
-      const row = Math.floor((pointer.y - 120) / 40);
+      const row = Math.floor((pointer.y - 110) / 36);
       if (row >= 0 && row < rows) {
         this.optionsIndex = row;
         this.activateOption();
@@ -571,6 +612,11 @@ export class App {
         this.settings.band = BANDS[this.bandIndex]!;
         break;
       }
+      case 2: {
+        const index = RULESET_IDS.indexOf(this.settings.ruleset);
+        this.settings.ruleset = RULESET_IDS[(index + delta + RULESET_IDS.length) % RULESET_IDS.length]!;
+        break;
+      }
       default:
         break;
     }
@@ -582,19 +628,20 @@ export class App {
     switch (this.optionsIndex) {
       case 0:
       case 1:
+      case 2:
         this.cycleOption(1);
         break;
-      case 2:
+      case 3:
         this.settings.muted = this.audio.toggle();
         this.saveSettings();
         this.audio.play('select');
         break;
-      case 3:
+      case 4:
         this.scores = [];
         this.saveScores();
         this.audio.play('wrong');
         break;
-      case 4:
+      case 5:
         this.screenId = 'menu';
         break;
       default:
@@ -633,6 +680,9 @@ export class App {
       case 'lesson':
         this.drawLesson(now);
         break;
+      case 'briefing':
+        this.drawBriefing(now);
+        break;
       default:
         break;
     }
@@ -652,7 +702,7 @@ export class App {
       [1, '#ff4cf7'],
     ], { size: 54, align: 'center' });
     this.screen.sprite(this.sprites.muncher, 74, y + 52 + bob, 56);
-    this.screen.sprite(this.sprites.troggles.smarty, 570, y + 52 - bob, 52);
+    this.screen.sprite(this.sprites.troggles.smarticus, 570, y + 52 - bob, 52);
   }
 
   private drawMenu(now: number): void {
@@ -686,9 +736,9 @@ export class App {
 
     const best = this.scores[0];
     this.screen.text(
-      `BAND ${BAND_LABELS[this.settings.band]}   ${DIFFICULTY_LABELS[this.settings.difficulty].toUpperCase()}   SOUND ${
-        this.audio.isMuted ? 'OFF' : 'ON'
-      }${best ? `   BEST ${best.score}` : ''}`,
+      `BAND ${BAND_LABELS[this.settings.band]}   ${RULESETS[this.settings.ruleset].label.toUpperCase()}   ${
+        DIFFICULTY_LABELS[this.settings.difficulty].toUpperCase()
+      }   SOUND ${this.audio.isMuted ? 'OFF' : 'ON'}${best ? `   BEST ${best.score}` : ''}`,
       320,
       378,
       { size: 9, color: C.dim, align: 'center' },
@@ -798,13 +848,14 @@ export class App {
     const rows = [
       { label: 'DIFFICULTY', value: DIFFICULTY_LABELS[this.settings.difficulty].toUpperCase() },
       { label: 'GRADE BAND', value: BAND_LABELS[this.settings.band].toUpperCase() },
+      { label: 'RULES', value: RULESETS[this.settings.ruleset].label.toUpperCase() },
       { label: 'SOUND', value: this.audio.isMuted ? 'OFF' : 'ON' },
       { label: 'CLEAR HIGH SCORES', value: 'PRESS ENTER' },
       { label: 'BACK', value: '' },
     ];
 
     rows.forEach((row, index) => {
-      const y = 120 + index * 40;
+      const y = 110 + index * 36;
       const selected = index === this.optionsIndex;
       if (selected) {
         this.screen.rect(120, y - 6, 400, 30, '#0000a8', 0.85);
@@ -833,17 +884,22 @@ export class App {
       ['GOAL', 'Eat every correct tile shown in the header. Eat a wrong one and you lose a life.'],
       ['MOVE', 'Arrow keys or WASD. Hold a direction to keep moving. Tap or click a cell to walk there.'],
       ['MUNCH', 'SPACE, ENTER, or click the cell you are standing on.'],
-      ['TROGGLES', 'Reggie wanders, Worker never turns, Smarty chases, Bashful flees, Helper meanders.'],
-      ['SCORING', 'Each correct munch is 5 points. Clear the board to advance; every 4th level is an interlude.'],
+      ['TROGGLES', 'Reggie walks straight, Worker re-rolls tiles, Smarty chases, Bashful flees, Helper erases.'],
+      ['SCORING', 'Points per munch rise with the level. Clear the board to advance; interludes show a mini-scene.'],
+      ['RULES', 'MODERN is tuned for today. CLASSIC uses the 1990 values: slow Troggles, four lives, 10,000-point extra lives.'],
       ['LIVES', 'You start with 3. A wrong munch or a Troggle costs one.'],
       ['PAUSE', 'ESC pauses. ESC again, from the pause menu, returns to the main menu. M toggles sound.'],
       ['LEARN', 'Got one wrong? Press L for a lesson on that topic, then come back and try again.'],
     ];
-    let y = 74;
+    let y = 70;
+    const measure = (value: string, size: number): number => this.screen.measure(value, size);
     for (const [key, text] of lines) {
       this.screen.text(key, 76, y, { size: 10, color: C.yellow });
-      this.wrap(text, 176, y, 388, 11, C.ink, 13);
-      y += 40;
+      const wrapped = wrapToWidth(text, 11, 372, measure);
+      wrapped.forEach((line, index) => {
+        this.screen.text(line, 176, y + index * 12, { size: 11, color: C.ink });
+      });
+      y += Math.max(30, wrapped.length * 12 + 12);
     }
     this.screen.text('PRESS ENTER OR ESC TO GO BACK', 320, 372, {
       size: 9,
@@ -883,6 +939,68 @@ export class App {
       align: 'center',
     });
     this.screen.text('ENTER OR ESC TO GO BACK', 320, 374, { size: 9, color: C.dim, align: 'center' });
+  }
+
+  /**
+   * Pre-game briefing: the goal, scoring and controls, with L for the lesson
+   * and ENTER to drop straight in.
+   */
+  private drawBriefing(now: number): void {
+    const session = this.session;
+    if (!session) return;
+    const topic = session.topic;
+    const rules = rulesetFor(this.settings.ruleset);
+    const wrap = (text: string, size: number, width: number): string[] =>
+      wrapToWidth(text, size, width, (value, px) => this.screen.measure(value, px));
+
+    this.screen.panel(52, 26, 536, 344, { fill: C.panel, border: C.accent, inner: '#3450ff' });
+
+    this.screen.text(topic.name.toUpperCase(), 320, 40, { size: 20, align: 'center', color: C.ink });
+    this.screen.text(
+      `${FAMILY_LABELS[topic.family].toUpperCase()}  ·  ${topic.grades.toUpperCase()}  ·  LEVEL ${session.level}`,
+      320,
+      68,
+      { size: 8, align: 'center', color: FAMILY_COLORS[topic.family] },
+    );
+
+    this.screen.text('YOUR GOAL', 76, 92, { size: 9, color: C.yellow });
+    this.screen.rect(76, 104, 488, 1, '#1b2fb5');
+    wrap(session.round.instruction, 13, 470).slice(0, 2).forEach((line, index) => {
+      this.screen.text(line, 320, 112 + index * 18, { size: 13, align: 'center', color: C.green });
+    });
+
+    const points = rules.pointsForLevel(session.level);
+    const bullets = [
+      `Munch the ${session.round.correctCount} correct tiles. A wrong tile costs one of your ${rules.startingLives} lives.`,
+      `${points} point${points === 1 ? '' : 's'} per correct munch. Clear the board to reach level ${session.level + 1}.`,
+      'Troggles hunt you between munches. Press L any time to learn this topic.',
+    ];
+    let y = 156;
+    for (const bullet of bullets) {
+      this.screen.rect(78, y + 5, 4, 4, C.cyan);
+      for (const line of wrap(bullet, 11, 452)) {
+        this.screen.text(line, 92, y, { size: 11, color: C.ink });
+        y += 15;
+      }
+      y += 6;
+    }
+
+    this.screen.text('CONTROLS', 76, 268, { size: 9, color: C.yellow });
+    this.screen.rect(76, 280, 488, 1, '#1b2fb5');
+    this.screen.text('ARROWS / WASD MOVE  ·  SPACE MUNCH  ·  L LEARN  ·  ESC BACK', 320, 288, {
+      size: 9,
+      align: 'center',
+      color: C.dim,
+    });
+
+    const pulse = 0.5 + 0.5 * Math.sin(now / 300);
+    this.screen.text('ENTER START', 320, 330, {
+      size: 13,
+      align: 'center',
+      color: pulse > 0.5 ? C.yellow : '#8a7a2a',
+    });
+    this.screen.text('L LEARN  ·  ESC BACK', 320, 352, { size: 8, align: 'center', color: C.dimmer });
+    this.screen.text(`RULES ${rules.label.toUpperCase()}`, 566, 34, { size: 8, align: 'right', color: C.dimmer });
   }
 
   private drawPause(now: number): void {
@@ -986,22 +1104,5 @@ export class App {
     ctx.closePath();
     ctx.fill();
     ctx.restore();
-  }
-
-  private wrap(text: string, x: number, y: number, maxWidth: number, size: number, color: string, lineHeight: number): void {
-    const words = text.split(' ');
-    let line = '';
-    let offset = 0;
-    for (const word of words) {
-      const probe = line ? `${line} ${word}` : word;
-      if (this.screen.measure(probe, size) > maxWidth && line) {
-        this.screen.text(line, x, y + offset, { size, color });
-        offset += lineHeight;
-        line = word;
-      } else {
-        line = probe;
-      }
-    }
-    if (line) this.screen.text(line, x, y + offset, { size, color });
   }
 }

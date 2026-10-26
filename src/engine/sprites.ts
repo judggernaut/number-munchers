@@ -45,6 +45,12 @@ export async function loadSprites(): Promise<Sprites> {
     muncherHappy,
     muncherSad,
     opening,
-    troggles: { reggie, worker, smarty, bashful, helper },
+    troggles: {
+    normalus: reggie,
+    laborus: worker,
+    smarticus: smarty,
+    timidus: bashful,
+    assistus: helper,
+  },
   };
 }

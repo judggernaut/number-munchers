@@ -29,6 +29,14 @@ project's Apache-2.0 license. They are recreations, not extracted EGA tiles.
 Fonts are rendered with the platform's monospace stack; no webfont is
 downloaded at runtime.
 
+## Audio and cutscenes
+
+All sound is synthesised at runtime with WebAudio oscillators; no audio samples
+were taken from the original game. The between-level interludes are original,
+sprite-based animations written for this project. The original `SCPT` scene
+resources were inventoried during the research pass but are neither extracted
+nor redistributed.
+
 ## Reference material used during development
 
 Reference copies of the DOS release and Apple II disk images were consulted

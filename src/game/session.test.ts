@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createRng } from '../content/rng';
 import type { Round, Topic, Tile } from '../content/types';
 import type { Sprites } from '../engine/sprites';
-import { RULES, type RuleSet } from './rules';
+import { RULES, RULESETS, type RuleSet } from './rules';
 import { GameSession } from './session';
 import type { Troggle } from './troggle';
 
@@ -44,6 +44,8 @@ const fastRules: RuleSet = {
   troggleTickMs: () => 100,
   spawnChance: () => 0,
   maxTroggles: () => 0,
+  initialTroggles: () => 0,
+  tickJitterMs: 0,
 };
 
 function session(round: Round, overrides: Partial<RuleSet> = {}) {
@@ -171,13 +173,100 @@ describe('muncher movement', () => {
   });
 });
 
+describe('classic ruleset behaviour', () => {
+  const classicRules = (over: Partial<RuleSet> = {}): RuleSet => ({
+    ...RULESETS.original,
+    troggleTickMs: () => 100,
+    tickJitterMs: 0,
+    initialTroggles: () => 0,
+    ...over,
+  });
+
+  function classicSession(round: Round, over: Partial<RuleSet> = {}, lives?: number, score?: number) {
+    const topic = makeTopic(() => round);
+    return new GameSession({
+      sprites: stubSprites,
+      rng: createRng(1),
+      difficulty: 'normal',
+      rules: classicRules(over),
+      roundFor: () => ({ topic, round }),
+      lives,
+      score,
+    });
+  }
+
+  it('uses the per-level point table', () => {
+    const game = classicSession(roundWith([]), {}, 4);
+    game.level = 4;
+    game.cells[index(2, 1)] = { text: 'x', correct: true, eaten: false };
+    game.update(200, ['up'], null);
+    game.update(16, ['munch'], null);
+    expect(game.score).toBe(10);
+  });
+
+  it('awards an extra life every 10,000 points', () => {
+    const game = classicSession(roundWith([]), {}, 4, 9998);
+    game.cells[index(2, 1)] = { text: 'x', correct: true, eaten: false };
+    game.update(200, ['up'], null);
+    game.update(16, ['munch'], null);
+    expect(game.score).toBe(10003);
+    expect(game.lives).toBe(5);
+  });
+
+  it('classic boards start with troggles on them', () => {
+    const game = classicSession(roundWith([]), { initialTroggles: (level) => level }, 4);
+    expect(game.troggles).toHaveLength(1);
+  });
+
+  it('laborus re-rolls the tile it leaves', () => {
+    const board = roundWith([]);
+    const game = classicSession(board, { initialTroggles: () => 0 }, 4);
+    game.cells[index(0, 0)] = { text: 'old', correct: false, eaten: false };
+    game.cells[index(1, 0)] = { text: 'other', correct: false, eaten: false };
+    game.troggles = [
+      { id: 1, species: 'laborus', col: 0, row: 0, dir: { dc: 1, dr: 0 }, fromCol: 0, fromRow: 0, steppedAt: 0 },
+    ];
+    game.update(150, [], null);
+    expect(game.troggles[0]!.col).toBe(1);
+    expect(game.cells[index(0, 0)]!.text).toBe('other');
+  });
+
+  it('assistus erases the tile it leaves', () => {
+    const game = classicSession(roundWith([]), { initialTroggles: () => 0 }, 4);
+    game.cells[index(0, 0)] = { text: 'answer', correct: true, eaten: false };
+    game.troggles = [
+      { id: 1, species: 'assistus', col: 0, row: 0, dir: { dc: 1, dr: 0 }, fromCol: 0, fromRow: 0, steppedAt: 0 },
+    ];
+    game.update(150, [], null);
+    expect(game.cells[index(0, 0)]!.eaten).toBe(true);
+    expect(game.cells[index(0, 0)]!.text).toBe('');
+  });
+
+  it('modern boards do not churn tiles', () => {
+    const board = roundWith([]);
+    const game = new GameSession({
+      sprites: stubSprites,
+      rng: createRng(1),
+      difficulty: 'normal',
+      rules: { ...fastRules, tileChurn: false },
+      roundFor: () => ({ topic: makeTopic(() => board), round: board }),
+    });
+    game.cells[index(0, 0)] = { text: 'old', correct: false, eaten: false };
+    game.troggles = [
+      { id: 1, species: 'laborus', col: 0, row: 0, dir: { dc: 1, dr: 0 }, fromCol: 0, fromRow: 0, steppedAt: 0 },
+    ];
+    game.update(150, [], null);
+    expect(game.cells[index(0, 0)]!.text).toBe('old');
+  });
+});
+
 describe('session troggle pressure', () => {
   it('loses a life when a troggle walks onto the muncher', () => {
     const board = roundWith([]);
     const game = session(board, { troggleTickMs: () => 50 });
     const hunter: Troggle = {
       id: 9,
-      species: 'smarty',
+      species: 'smarticus',
       col: 2,
       row: 1,
       dir: { dc: 0, dr: 1 },
@@ -186,7 +275,7 @@ describe('session troggle pressure', () => {
       steppedAt: 0,
     };
     game.troggles = [hunter];
-    game.update(60, [], null);
+    game.update(150, [], null);
     expect(game.lives).toBe(2);
     expect(game.status).toBe('eaten');
     expect(game.troggles).toHaveLength(0);

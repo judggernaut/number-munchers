@@ -79,8 +79,26 @@ Adding a topic is one object in one file:
 `src/content/__tests__/content.test.ts` will tell you immediately if the board
 is unfair or the tile text won't fit.
 
+## Rules
+
+Two complete rulesets, switchable in Options:
+
+| | Modern | Classic |
+| --- | --- | --- |
+| Lives | 3 | 4, plus an extra life every 10,000 points |
+| Troggle tick | 1.2 s, tightening to 0.26 s | 10.3 s at level 1 down to 1.03 s at level 12, with jitter |
+| Points per munch | 5 | 5,5,5,10,15...70 by level, then 75 |
+| Troggles | spawn during play, up to 4 | 1-3 on screen from level start |
+| Interlude | every 4 levels | every 3 levels |
+| Tile churn | no | Worker re-rolls and Helper erases the tile they leave |
+
+Classic values come from static analysis of the 1990 `NM.EXE`; see
+[`docs/re/original-analysis.md`](re/original-analysis.md).
+
 ## How it plays
 
+- Starting a run opens a briefing page with the goal, scoring and controls:
+  `ENTER` starts, `L` opens the lesson, `ESC` backs out.
 - 6x5 board, 30 tiles, 8-12 of them correct.
 - 5 points per correct munch. A wrong munch costs a life and explains itself.
 - Press **L** on any wrong answer (or in the pause menu / topic picker) to open
@@ -91,8 +109,13 @@ is unfair or the tile text won't fit.
 - Clear every correct tile to advance. Every fourth level is an interlude.
 - Troggles get faster and more numerous; species unlock as you go.
 
-Troggle roster: **Reggie** wanders, **Worker** never turns, **Smarty** chases,
-**Bashful** flees, **Helper** meanders.
+Troggle roster (original names, friendly nicknames in brackets):
+**Trogglus normalus** (Reggie) walks straight, **laborus** (Worker) re-rolls the
+tile it leaves, **smarticus** (Smarty) chases, **timidus** (Bashful) flees,
+**assistus** (Helper) erases the tile it leaves.
+
+Interludes are animated mini-scenes: the Muncher squeezes through a gap and the
+Troggle bonks into the wall.
 
 ## Project layout
 

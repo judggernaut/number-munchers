@@ -144,6 +144,20 @@ page built from the topic blurb and a live round, so a new topic is never
 linkless. The page is reachable from a wrong answer (`L`), the pause menu, and
 the topic picker.
 
+## Rulesets
+
+`src/game/rules.ts` exposes two `RuleSet` objects: `modern` (tuned pacing) and
+`original` (values recovered from the binary). Everything that varies between
+them lives in the interface - points per level, tick length and jitter, initial
+troggles, species unlock schedule, interlude cadence, tile churn, extra lives -
+so the session never branches on the ruleset id.
+
+## Interludes
+
+Between levels the session draws a short scripted scene (Muncher runs, Troggle
+gives chase, wall, bonk, stars) driven by `interludeStartedAt`. It shares the
+same sprite atlas as the board and needs no new assets.
+
 ## Level flow
 
 `GameSession` owns one run. A `roundFor(level)` callback decides which topic

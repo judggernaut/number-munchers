@@ -2,7 +2,7 @@ import type { Rng, TileVisual, Topic } from '../content/types';
 import type { Sprites } from '../engine/sprites';
 import type { Screen } from '../engine/screen';
 import { drawVisual } from '../engine/visuals';
-import { planOverlay } from '../ui/text-layout';
+import { planOverlay, wrapToWidth } from '../ui/text-layout';
 import type { Action } from '../engine/input';
 import {
   DIFFICULTY_SPEED,
@@ -16,6 +16,8 @@ import {
   SPECIES_COLORS,
   SPECIES_NAMES,
   collides,
+  erasesTiles,
+  rerollsTiles,
   spawnAtEdge,
   stepTroggle,
   type Cell,
@@ -80,6 +82,9 @@ export class GameSession {
   private holdMs = 0;
   private clickTarget: Cell | null = null;
   private nextTroggleId = 1;
+  private nextTickMs = 0;
+  private nextExtraLife = 0;
+  private interludeStartedAt = 0;
 
   constructor(deps: SessionDeps) {
     this.deps = deps;
@@ -92,6 +97,30 @@ export class GameSession {
     this.topic = topic;
     this.round = round;
     this.cells = this.buildCells(round);
+    this.nextExtraLife = this.rules.extraLifeEvery;
+    this.nextTickMs = this.rollTick();
+    this.spawnInitialTroggles();
+  }
+
+  /** Tick length with the original's random jitter applied. */
+  private rollTick(): number {
+    const base = tickMsFor(this.rules, this.level, this.deps.difficulty);
+    const jitter = this.rules.tickJitterMs > 0 ? this.rng.int(0, this.rules.tickJitterMs) : 0;
+    return base + jitter;
+  }
+
+  private spawnInitialTroggles(): void {
+    const count = this.rules.initialTroggles(this.level);
+    const ctx = {
+      cols: BOARD.cols,
+      rows: BOARD.rows,
+      muncher: this.muncherCell,
+      rng: this.rng,
+    };
+    for (let i = 0; i < count; i++) {
+      const species = pickSpecies(this.rules.speciesForLevel(this.level), this.rng);
+      this.troggles.push(spawnAtEdge(ctx, species, this.nextTroggleId++, this.muncherCell));
+    }
   }
 
   private buildCells(round: ReturnType<Topic['round']>): Cell_[] {
@@ -259,7 +288,7 @@ export class GameSession {
 
     cell.eaten = true;
     if (cell.correct) {
-      this.score += this.rules.pointsPerMunch;
+      this.awardPoints(this.rules.pointsForLevel(this.level));
       this.emit('munch');
       this.prompt = '';
       if (this.correctRemaining === 0) this.levelClear();
@@ -271,6 +300,14 @@ export class GameSession {
       this.emit('wrong');
       if (this.lives <= 0) this.gameOver();
       else this.status = 'wrong';
+    }
+  }
+
+  private awardPoints(points: number): void {
+    this.score += points;
+    while (this.rules.extraLifeEvery > 0 && this.score >= this.nextExtraLife) {
+      this.lives += 1;
+      this.nextExtraLife += this.rules.extraLifeEvery;
     }
   }
 
@@ -304,6 +341,7 @@ export class GameSession {
         const isInterlude = nextLevel % this.rules.levelsPerInterlude === 1 && nextLevel > 1;
         if (isInterlude) {
           this.status = 'interlude';
+          this.interludeStartedAt = performance.now();
           this.message = interludeText(nextLevel);
           this.prompt = 'Press SPACE to keep munching';
           this.emit('interlude');
@@ -331,6 +369,7 @@ export class GameSession {
     this.troggles = [];
     this.troggleClock = 0;
     this.stepClock = 0;
+    this.nextTickMs = this.rollTick();
     this.muncher.col = CENTER.col;
     this.muncher.row = CENTER.row;
     this.muncher.fromCol = CENTER.col;
@@ -339,13 +378,14 @@ export class GameSession {
     this.status = 'play';
     this.message = '';
     this.prompt = '';
+    this.spawnInitialTroggles();
   }
 
   private troggleTick(dt: number): void {
-    const interval = tickMsFor(this.rules, this.level, this.deps.difficulty);
     this.troggleClock += dt;
-    if (this.troggleClock < interval) return;
+    if (this.troggleClock < this.nextTickMs) return;
     this.troggleClock = 0;
+    this.nextTickMs = this.rollTick();
 
     const ctx = {
       cols: BOARD.cols,
@@ -354,7 +394,9 @@ export class GameSession {
       rng: this.rng,
     };
     const now = performance.now();
+    const before = this.troggles.map((t) => ({ species: t.species, col: t.col, row: t.row }));
     this.troggles = this.troggles.map((t) => stepTroggle(t, ctx, now));
+    if (this.rules.tileChurn) this.applyChurn(before);
 
     // Spawning.
     const max = this.rules.maxTroggles(this.level);
@@ -365,6 +407,33 @@ export class GameSession {
     }
 
     this.checkContact();
+  }
+
+  /**
+   * Original behaviour: some species change the cell they step off. laborus
+   * re-rolls it, assistus wipes it. Correct-tile counts are preserved so a
+   * level can never become unwinnable.
+   */
+  private applyChurn(before: Array<{ species: Troggle['species']; col: number; row: number }>): void {
+    for (const previous of before) {
+      const index = this.indexOf(previous.col, previous.row);
+      const cell = this.cells[index];
+      if (!cell || cell.eaten) continue;
+
+      if (erasesTiles(previous.species)) {
+        cell.text = '';
+        cell.eaten = true;
+        continue;
+      }
+
+      if (rerollsTiles(previous.species)) {
+        const pool = this.cells.filter(
+          (other) => other !== cell && !other.eaten && other.correct === cell.correct && other.text !== cell.text,
+        );
+        if (pool.length === 0) continue;
+        cell.text = this.rng.pick(pool).text;
+      }
+    }
   }
 
   private checkContact(): void {
@@ -392,6 +461,14 @@ export class GameSession {
       level: this.level,
       species,
     });
+  }
+
+  /** Dev-only: jump straight to the interlude scene for visual QA. */
+  debugInterlude(): void {
+    this.status = 'interlude';
+    this.message = 'The Troggle bonks into the wall while you slip away through the gap!';
+    this.prompt = 'Press SPACE to keep munching';
+    this.interludeStartedAt = performance.now();
   }
 
   /** Milliseconds remaining until the next troggle step, for the danger meter. */
@@ -542,6 +619,10 @@ export class GameSession {
   }
 
   private drawOverlay(screen: Screen, pulse: number): void {
+    if (this.status === 'interlude') {
+      this.drawInterlude(screen, pulse);
+      return;
+    }
     // Messages can be long ("its angles are 100, 40 and 40 degrees, so ..."),
     // so the panel is laid out from measured, wrapped lines and grows to fit.
     const plan = planOverlay(this.message, (text, size) => screen.measure(text, size));
@@ -575,6 +656,66 @@ export class GameSession {
         align: 'center',
       });
     }
+  }
+
+  /**
+   * Mini-scene shown between levels: the Muncher outruns a Troggle, the Troggle
+   * bonks into the wall, stars. Skippable with any confirm key.
+   */
+  private drawInterlude(screen: Screen, pulse: number): void {
+    const elapsed = performance.now() - this.interludeStartedAt;
+    screen.rect(0, 0, 640, 400, '#000010', 0.55);
+    screen.panel(70, 78, 500, 250, { fill: '#00004d', border: '#7dffb0', inner: '#3450ff' });
+
+    screen.text('INTERLUDE', 320, 92, { size: 10, color: '#5f7fd0', align: 'center' });
+    screen.text('You outsmarted the Troggle!', 320, 110, { size: 14, color: '#ffd85a', align: 'center' });
+
+    const floorY = 236;
+    screen.rect(96, floorY, 448, 2, '#3450ff');
+
+    // The wall the Troggle fails to get through, with a gap the Muncher fits.
+    const wallX = 430;
+    screen.rect(wallX, 186, 4, 20, '#3450ff');
+    screen.rect(wallX, 224, 4, 14, '#3450ff');
+
+    const run = Math.min(1, elapsed / 1400);
+    const muncherX = 140 + run * 350;
+    const troggleX = 96 + run * 324;
+    const hopWindow = elapsed > 1400 && elapsed < 1950;
+    const hop = hopWindow ? Math.sin(((elapsed - 1400) / 550) * Math.PI) * 38 : 0;
+    const bonked = elapsed >= 1950;
+    const shake = bonked && elapsed < 2400 ? Math.sin(elapsed / 35) * 4 : 0;
+
+    screen.sprite(this.deps.sprites.troggles.normalus, troggleX + shake, floorY - 30, 46);
+    screen.sprite(
+      bonked ? this.deps.sprites.muncherHappy : this.deps.sprites.muncher,
+      muncherX,
+      floorY - 34 - hop,
+      50,
+    );
+
+    if (bonked) {
+      const starAt = elapsed < 2600 ? Math.min(1, (elapsed - 1950) / 650) : 1;
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const radius = 10 + starAt * 22;
+        const sx = wallX - 6 + Math.cos(angle) * radius;
+        const sy = floorY - 34 + Math.sin(angle) * radius * 0.6;
+        screen.rect(sx, sy, 3, 3, '#ffd85a', 1 - starAt * 0.6);
+      }
+      // Dust puffs at the impact.
+      for (let i = 0; i < 3; i++) {
+        screen.rect(wallX - 10 - i * 6, floorY - 6 - i * 3, 4, 3, '#7d8fe0', 0.5 - i * 0.1);
+      }
+    }
+
+    const messageLines = wrapToWidth(this.message, 10, 430, (text, size) => screen.measure(text, size));
+    messageLines.slice(0, 3).forEach((line, index) => {
+      screen.text(line, 320, 262 + index * 14, { size: 10, color: '#ffffff', align: 'center' });
+    });
+
+    const promptColor = pulse > 0.5 ? '#ffd85a' : '#8a7a2a';
+    screen.text(this.prompt, 320, 306, { size: 10, color: promptColor, align: 'center' });
   }
 }
 
