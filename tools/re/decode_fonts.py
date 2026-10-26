@@ -52,12 +52,12 @@ def load(fn):
     return dict(tag=tag, width=width, height=height, glyphs=glyphs, widths=widths,
                 data_off=data_off, row_bits=row_bits)
 
-def make_json(font, path, proportional=False):
+def make_json(font, path, proportional=False, cell_width=None):
     out = {
-        'cellWidth': font['width'],
+        'cellWidth': cell_width if cell_width is not None else font['width'],
         'cellHeight': font['height'],
         'proportional': proportional,
-        'source': None,
+        'source': font['tag'] + '.GFT',
         'glyphs': {}
     }
     for g in range(0x20, 0x7f):
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     print(f8['tag'], f8['width'], f8['height'], f8['data_off'], f8['row_bits'])
     print(f5['tag'], f5['width'], f5['height'], f5['data_off'], f5['row_bits'])
     make_json(f8, os.path.join(REPO, 'src/assets/font-mecc8x8.json'))
-    make_json(f5, os.path.join(REPO, 'src/assets/font-mecc5x8.json'), proportional=True)
+    make_json(f5, os.path.join(REPO, 'src/assets/font-mecc5x8.json'), proportional=True, cell_width=6)
     os.makedirs(os.path.join(REPO, 'docs/re'), exist_ok=True)
     sheet(f8, f5, os.path.join(REPO, 'docs/re/font-preview.png'))
     print('written')

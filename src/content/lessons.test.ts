@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ALL_TOPICS } from './registry';
+import { createRng } from './rng';
 import { LESSON_LIMITS, LESSONS, fallbackLesson, lessonFor } from './lessons';
 
 const ASCII = /^[\x20-\x7e]+$/;
@@ -46,6 +47,18 @@ describe('lesson pages', () => {
       expect(lesson.tip?.length ?? 0, `${id} tip`).toBeLessThanOrEqual(LESSON_LIMITS.tip);
       expect(lesson.example.why.length, `${id} why`).toBeLessThanOrEqual(LESSON_LIMITS.why);
       expect(lesson.summary, `${id} ascii`).toMatch(ASCII);
+    }
+  });
+
+  it('attaches a drawn example to every visual topic, and only those', () => {
+    for (const topic of ALL_TOPICS) {
+      const visualTopic = topic.round(createRng(11), 1).tiles.some((tile) => tile.visual);
+      const lesson = lessonFor(topic);
+      expect(Boolean(lesson.figure), `${topic.id}`).toBe(visualTopic);
+      if (lesson.figure) {
+        expect(lesson.figure.caption.length).toBeGreaterThan(0);
+        expect(['plot', 'shape']).toContain(lesson.figure.visual.kind);
+      }
     }
   });
 

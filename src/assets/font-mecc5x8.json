@@ -1,8 +1,8 @@
 {
- "cellWidth": 8,
+ "cellWidth": 6,
  "cellHeight": 8,
  "proportional": true,
- "source": null,
+ "source": "NEW5X8.GFT",
  "glyphs": {
   " ": [
    "000000",

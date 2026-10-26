@@ -134,6 +134,43 @@ describe('session scoring and lives', () => {
   });
 });
 
+describe('muncher movement', () => {
+  it('moves exactly one cell per arrow press', () => {
+    const game = session(roundWith([]));
+    game.update(16, ['up'], null);
+    expect(game.muncherCell).toEqual({ col: 2, row: 1 });
+    // A slow frame must not turn one press into two moves.
+    game.update(400, ['up'], null);
+    expect(game.muncherCell).toEqual({ col: 2, row: 0 });
+  });
+
+  it('does not double-move when the key is still held after a press', () => {
+    const game = session(roundWith([]));
+    // Frame 1: keydown -> queued action while the key is also held.
+    game.update(16, ['left'], { dc: -1, dr: 0 });
+    expect(game.muncherCell).toEqual({ col: 1, row: 2 });
+    // Frame 2..10: still held, but inside the repeat delay window.
+    for (let i = 0; i < 10; i++) game.update(16, [], { dc: -1, dr: 0 });
+    expect(game.muncherCell).toEqual({ col: 1, row: 2 });
+  });
+
+  it('auto-repeats only after the hold delay', () => {
+    const game = session(roundWith([]));
+    game.update(16, ['down'], { dc: 0, dr: 1 });
+    expect(game.muncherCell).toEqual({ col: 2, row: 3 });
+    // 640 ms of holding is past the 260 ms delay plus a step, so it must repeat.
+    for (let i = 0; i < 40; i++) game.update(16, [], { dc: 0, dr: 1 });
+    expect(game.muncherCell.row).toBeGreaterThan(3);
+  });
+
+  it('walks toward a clicked cell at a steady cadence', () => {
+    const game = session(roundWith([]));
+    game.pointTo({ col: 4, row: 2 });
+    for (let i = 0; i < 30; i++) game.update(16, [], null);
+    expect(game.muncherCell).toEqual({ col: 4, row: 2 });
+  });
+});
+
 describe('session troggle pressure', () => {
   it('loses a life when a troggle walks onto the muncher', () => {
     const board = roundWith([]);

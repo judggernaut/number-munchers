@@ -1,4 +1,5 @@
 import { makeRound } from '../build';
+import { createRng } from '../rng';
 import type { PlotFamily, PlotSpec, Rng, Topic } from '../types';
 
 /**
@@ -365,3 +366,8 @@ const graphFeatures: Topic = {
 };
 
 export const graphTopics: Topic[] = [functionFamilies, graphFeatures];
+
+/** A deterministic sample plot for a family, used by lesson pages. */
+export function plotForFamily(family: PlotFamily, seed = 0x5eed): PlotSpec {
+  return makePlot(family, createRng(seed), 5).spec;
+}

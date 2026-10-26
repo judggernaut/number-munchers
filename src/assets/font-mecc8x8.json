@@ -2,7 +2,7 @@
  "cellWidth": 8,
  "cellHeight": 8,
  "proportional": false,
- "source": null,
+ "source": "MECC8X8.GFT",
  "glyphs": {
   " ": [
    "00000000",

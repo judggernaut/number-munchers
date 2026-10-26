@@ -9,6 +9,7 @@ import { Screen, VIEW_H, VIEW_W } from '../engine/screen';
 import type { Sprites } from '../engine/sprites';
 import { DIFFICULTY_LABELS, type DifficultyId } from '../game/rules';
 import { planLesson } from './lesson-view';
+import { drawVisual } from '../engine/visuals';
 import { GameSession, type SessionEvent } from '../game/session';
 
 const C = {
@@ -746,6 +747,24 @@ export class App {
       this.screen.text(topic.grades, 552, y + 7, { size: 9, color: C.dim, align: 'right' });
     }
 
+    // Scroll affordances: chevrons plus a proportional scrollbar so it is
+    // obvious the list continues past the six visible rows.
+    const visibleRows = 6;
+    const hasAbove = this.topicScroll > 0;
+    const hasBelow = this.topicScroll + visibleRows < list.length;
+    const trackX = 576;
+    const trackTop = 108;
+    const trackHeight = 168;
+    this.screen.rect(trackX, trackTop, 3, trackHeight, '#101a3f');
+    if (list.length > visibleRows) {
+      const thumbHeight = Math.max(24, Math.round((visibleRows / list.length) * trackHeight));
+      const maxScroll = list.length - visibleRows;
+      const thumbTop = trackTop + Math.round((this.topicScroll / maxScroll) * (trackHeight - thumbHeight));
+      this.screen.rect(trackX, thumbTop, 3, thumbHeight, '#5f7fd0');
+    }
+    if (hasAbove) this.chevron(trackX + 1, trackTop - 8, -1, C.yellow);
+    if (hasBelow) this.chevron(trackX + 1, trackTop + trackHeight + 8, 1, C.yellow);
+
     const selectedTopic = list[this.topicIndex];
     this.screen.panel(76, 296, 488, 62, { fill: C.panel, border: C.dimmer, inner: '#1b2fb5' });
     if (selectedTopic) {
@@ -906,10 +925,16 @@ export class App {
       { size: 8, align: 'center', color: FAMILY_COLORS[topic.family] },
     );
 
+    // Text column (narrower when a figure is present).
+    const hasFigure = Boolean(topic && lessonFor(topic).figure);
+    const figureWidth = 132;
+    const textWidth = hasFigure ? 488 - figureWidth - 16 : 488;
+    void textWidth;
+
     let y = 74;
     for (const block of plan.blocks) {
       this.screen.text(block.header, 64, y, { size: 9, color: C.yellow });
-      this.screen.rect(64, y + 11, 512, 1, '#1b2fb5');
+      this.screen.rect(64, y + 11, 488 - (hasFigure ? figureWidth + 16 : 0), 1, '#1b2fb5');
       y += 16;
       for (const line of block.lines) {
         const isAnswer = line.startsWith('Answer:');
@@ -922,6 +947,22 @@ export class App {
       y += 9;
     }
 
+    // Drawn example, pinned top-right so it costs width rather than height.
+    const figure = lesson.figure;
+    if (figure) {
+      const box = { x: 64 + 488 - figureWidth, y: 74, w: figureWidth, h: figureWidth };
+      this.screen.rect(box.x, box.y, box.w, box.h, '#00006b');
+      drawVisual(this.screen.ctx, figure.visual, box);
+      this.screen.stroke(box.x, box.y, box.w, box.h, '#1b2fb5', 1);
+      const captionSize = Math.max(8, plan.size - 1);
+      plan.captionLines.forEach((line, index) => {
+        this.screen.text(line, box.x, box.y + box.h + 8 + index * (captionSize + 3), {
+          size: captionSize,
+          color: C.dim,
+        });
+      });
+    }
+
     if (plan.overflow) {
       this.screen.text('MORE IN THE DOCS', 320, 352, { size: 8, align: 'center', color: C.orange });
     }
@@ -931,6 +972,20 @@ export class App {
       align: 'center',
       color: C.dim,
     });
+  }
+
+  /** Small filled triangle used as a "there is more" indicator. */
+  private chevron(cx: number, cy: number, direction: -1 | 1, color: string): void {
+    const ctx = this.screen.ctx;
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(cx - 5, cy - direction * 5);
+    ctx.lineTo(cx + 5, cy - direction * 5);
+    ctx.lineTo(cx, cy + direction * 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
 
   private wrap(text: string, x: number, y: number, maxWidth: number, size: number, color: string, lineHeight: number): void {

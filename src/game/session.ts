@@ -24,6 +24,8 @@ import {
 
 export const BOARD = { cols: 6, rows: 5, x: 128, y: 56, cell: 64 } as const;
 const CENTER: Cell = { col: 2, row: 2 };
+/** How long a direction must be held before auto-repeat kicks in. */
+const HOLD_REPEAT_DELAY_MS = 260;
 
 export type SessionStatus = 'play' | 'wrong' | 'eaten' | 'clear' | 'interlude' | 'gameover';
 
@@ -75,6 +77,7 @@ export class GameSession {
 
   private troggleClock = 0;
   private stepClock = 0;
+  private holdMs = 0;
   private clickTarget: Cell | null = null;
   private nextTroggleId = 1;
 
@@ -154,7 +157,6 @@ export class GameSession {
     heldDir: { dc: number; dr: number } | null,
   ): void {
     const stepMs = this.rules.muncherStepMs(this.level);
-    this.stepClock += dt;
 
     let requested: { dc: number; dr: number } | null = null;
     for (const action of actions) {
@@ -165,16 +167,47 @@ export class GameSession {
 
     if (this.status !== 'play') return;
 
+    // A fresh press always moves exactly one cell. That is the whole point of
+    // the delay below: a 150 ms tap must not eat two cells.
     if (requested) {
       this.clickTarget = null;
-      this.stepClock = stepMs;
-    }
-    if (heldDir) this.clickTarget = null;
-    const dir = requested ?? heldDir ?? this.dirToTarget();
-    if (dir && this.stepClock >= stepMs) {
+      this.holdMs = 0;
       this.stepClock = 0;
-      this.moveBy(dir.dc, dir.dr);
-      if (this.clickTarget && this.muncher.col === this.clickTarget.col && this.muncher.row === this.clickTarget.row) {
+      this.moveBy(requested.dc, requested.dr);
+      return;
+    }
+
+    if (heldDir) {
+      this.clickTarget = null;
+      this.holdMs += dt;
+      // Auto-repeat only after the key has been held a while (like a keyboard).
+      if (this.holdMs >= HOLD_REPEAT_DELAY_MS) {
+        this.stepClock += dt;
+        if (this.stepClock >= stepMs) {
+          this.stepClock -= stepMs;
+          this.moveBy(heldDir.dc, heldDir.dr);
+        }
+      }
+      return;
+    }
+
+    this.holdMs = 0;
+
+    // Click/tap-to-walk keeps its own cadence.
+    const targetDir = this.dirToTarget();
+    if (!targetDir) {
+      this.stepClock = 0;
+      return;
+    }
+    this.stepClock += dt;
+    if (this.stepClock >= stepMs) {
+      this.stepClock -= stepMs;
+      this.moveBy(targetDir.dc, targetDir.dr);
+      if (
+        this.clickTarget &&
+        this.muncher.col === this.clickTarget.col &&
+        this.muncher.row === this.clickTarget.row
+      ) {
         this.clickTarget = null;
       }
     }
@@ -202,6 +235,7 @@ export class GameSession {
     }
     this.clickTarget = { col: cell.col, row: cell.row };
     this.stepClock = this.rules.muncherStepMs(this.level);
+    this.holdMs = 0;
   }
 
   private moveBy(dc: number, dr: number): void {

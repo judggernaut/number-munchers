@@ -141,6 +141,12 @@ export interface LessonExample {
   why: string;
 }
 
+/** A drawn example for the lesson page (a shape, a plot). */
+export interface LessonFigure {
+  visual: TileVisual;
+  caption: string;
+}
+
 /** Everything the "Learn" page shows for one topic. */
 export interface Lesson {
   /** What the topic is about, 1-3 short sentences. */
@@ -149,6 +155,8 @@ export interface Lesson {
   steps: string[];
   example: LessonExample;
   tip?: string;
+  /** Optional drawn example, auto-derived for visual topics. */
+  figure?: LessonFigure;
 }
 
 export interface Topic {

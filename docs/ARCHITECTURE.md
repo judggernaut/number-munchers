@@ -134,7 +134,11 @@ the popup, so content cannot regress this.
 
 ## Lessons
 
-Every topic has a `Lesson` (`summary`, `steps`, `example`, `tip`). Authored copy
+Every topic has a `Lesson` (`summary`, `steps`, `example`, `tip`, optional
+`figure`). Visual topics get a figure automatically: `figureFor()` matches the
+lesson's answer text against shape and plot keywords, so "cube" draws a cube and
+"a U-shaped parabola" draws a parabola, in a right-hand column that costs width
+instead of height. Authored copy
 lives in `src/content/lessons-data.ts`; `lessonFor()` falls back to a generated
 page built from the topic blurb and a live round, so a new topic is never
 linkless. The page is reachable from a wrong answer (`L`), the pause menu, and

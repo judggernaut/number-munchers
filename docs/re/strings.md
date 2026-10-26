@@ -17,19 +17,19 @@ randomised mode, not a separate question generator.
 
 | file off | DS | text |
 |---|---|---|
-| 173509 | `0x0486` | `Multiples ` |
-| 173522 | `0x0493` | `Factors ` |
-| 173533 | `0x049e` | `Primes ` |
-| 173543 | `0x04a8` | `Equality ` |
-| 173555 | `0x04b4` | `Inequality ` |
-| 173569 | `0x04c2` | `Challenge ` |
-| 178190 | `0x06fe` | `NUMBER MUNCHERS` |
-| 178223 | `0x070b` | `Multiples` |
-| 178233 | `0x0715` | `Factors` |
-| 178241 | `0x071d` | `Primes` |
-| 178248 | `0x0724` | `Equality` |
-| 178257 | `0x072d` | `Inequality` |
-| 178268 | `0x0738` | `Challenge` |
+| 173509 | `0x0485` | `Multiples ` |
+| 173522 | `0x0492` | `Factors ` |
+| 173533 | `0x049d` | `Primes ` |
+| 173543 | `0x04a7` | `Equality ` |
+| 173555 | `0x04b3` | `Inequality ` |
+| 173569 | `0x04c1` | `Challenge ` |
+| 178190 | `0x16ce` | `NUMBER MUNCHERS` |
+| 178223 | `0x16ef` | `Multiples` |
+| 178233 | `0x16f9` | `Factors` |
+| 178241 | `0x1701` | `Primes` |
+| 178248 | `0x1708` | `Equality` |
+| 178257 | `0x1711` | `Inequality` |
+| 178268 | `0x171c` | `Challenge` |
 
 ## 2. Current rule / sub-content labels
 
@@ -44,9 +44,9 @@ These are printed at the top of the playfield / used by Set Content.
 | 177587 | `0x1473` | `Less Than` |
 | 177597 | `0x147d` | `Not Equal to` |
 | 177610 | `0x148a` | `Greater Than` |
-| 177036 | `0x12c4` | `pless than` (leading `p` is a compiler artefact in the raw dump; the real text is `less than`) |
-| 177047 | `0x12cf` | `pnot equal` |
-| 177058 | `0x12da` | `pgreater than` |
+| 177036 | `0x124c` | `pless than` (leading `p` is a compiler artefact in the raw dump; the real text is `less than`) |
+| 177047 | `0x1257` | `pnot equal` |
+| 177058 | `0x1262` | `pgreater than` |
 
 ## 3. Difficulty / grade menu
 
