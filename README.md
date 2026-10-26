@@ -5,6 +5,8 @@ the MECC classroom classic, rebuilt on a canvas engine with an extensible
 curriculum that now runs from grade 3 arithmetic through high-school algebra,
 geometry, trigonometry, statistics, and pre-calculus.
 
+**Play it:** <https://judggernaut.github.io/number-munchers/>
+
 Eat the tiles that answer the prompt. Avoid the ones that don't. Avoid the
 Troggles.
 

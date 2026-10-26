@@ -754,7 +754,7 @@ export class App {
       ['TROGGLES', 'Reggie wanders, Worker never turns, Smarty chases, Bashful flees, Helper meanders.'],
       ['SCORING', 'Each correct munch is 5 points. Clear the board to advance; every 4th level is an interlude.'],
       ['LIVES', 'You start with 3. A wrong munch or a Troggle costs one.'],
-      ['PAUSE', 'ESC opens the pause menu. M toggles sound at any time.'],
+      ['PAUSE', 'ESC pauses. ESC again, from the pause menu, returns to the main menu. M toggles sound.'],
     ];
     let y = 74;
     for (const [key, text] of lines) {
@@ -815,6 +815,11 @@ export class App {
         align: 'center',
         color: selected ? C.yellow : C.dim,
       });
+    });
+    this.screen.text('ENTER SELECT  ·  ESC QUIT TO MENU', 320, 246, {
+      size: 8,
+      align: 'center',
+      color: C.dimmer,
     });
   }
 
