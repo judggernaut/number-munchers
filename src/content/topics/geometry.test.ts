@@ -115,10 +115,10 @@ for (const topic of geometryTopics) {
 describe('geometry independent checks', () => {
   it('angles: every correct tile equals the complement, supplement or vertical partner', () => {
     for (const { round } of allRounds(0)) {
-      const m = /^(Complementary|Supplementary|Vertical) to (\d+) deg$/.exec(round.heading);
+      const m = /^(?:Adds to (90|180) with|Opposite) (\d+) deg$/.exec(round.heading);
       expect(m, round.heading).not.toBeNull();
       const given = Number(m![2]);
-      const partner = m![1] === 'Complementary' ? 90 - given : m![1] === 'Supplementary' ? 180 - given : given;
+      const partner = m![1] ? Number(m![1]) - given : given;
       for (const tile of round.tiles) {
         const value = evalArith(tile.text);
         expect(value, tile.text).not.toBeNull();

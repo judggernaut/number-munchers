@@ -188,9 +188,15 @@ export function verifyRound(topicId: string, round: Round): string[] {
       break;
     }
     case 'inequality': {
-      const match = round.heading.match(/^Inequality:\s*(>=|<=|>|<)\s*(.+)$/);
-      if (!match) throw new Error(`bad inequality heading "${round.heading}"`);
-      const comparison = `${match[1]} ${match[2]}`;
+      const phrases: Array<[RegExp, string]> = [
+        [/^More than (.+)$/, '>'],
+        [/^Less than (.+)$/, '<'],
+        [/^At least (.+)$/, '>='],
+        [/^At most (.+)$/, '<='],
+      ];
+      const found = phrases.map(([re, op]) => ({ m: round.heading.match(re), op })).find((x) => x.m);
+      if (!found?.m) throw new Error(`bad inequality heading "${round.heading}"`);
+      const comparison = `${found.op} ${found.m[1]}`;
       for (const tile of round.tiles) {
         check(tile.text, compare(evaluate(tile.text), comparison));
       }
@@ -212,10 +218,11 @@ export function verifyRound(topicId: string, round: Round): string[] {
       break;
     }
     case 'rounding': {
-      const match = round.heading.match(/nearest (\d+) = (\d+)/);
-      if (!match) throw new Error(`bad rounding heading "${round.heading}"`);
-      const unit = Number(match[1]);
-      const target = Number(match[2]);
+      const targetMatch = round.heading.match(/^Rounds to (\d+)$/);
+      const unitMatch = round.instruction.match(/nearest (\d+)/);
+      if (!targetMatch || !unitMatch) throw new Error(`bad rounding heading "${round.heading}"`);
+      const unit = Number(unitMatch[1]);
+      const target = Number(targetMatch[1]);
       for (const tile of round.tiles) {
         const value = int(tile.text);
         check(tile.text, Math.round(value / unit) * unit === target);

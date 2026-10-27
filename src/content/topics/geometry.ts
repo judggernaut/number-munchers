@@ -84,7 +84,7 @@ type AngleMode = 'complementary' | 'supplementary' | 'vertical';
 
 const angles: Topic = {
   id: 'angles',
-  name: 'Angle Relationships',
+  name: 'Angles',
   family: 'geometry',
   band: 'middle',
   grades: 'Grades 6-8',
@@ -137,10 +137,18 @@ const angles: Topic = {
 
     return makeRound({
       rng,
-      heading: `${mode === 'complementary' ? 'Complementary' : mode === 'supplementary' ? 'Supplementary' : 'Vertical'} to ${given} deg`,
-      instruction: mode === 'vertical'
-        ? `Munch every measure equal to the vertical angle to ${given} deg.`
-        : `Munch every measure ${mode} to ${given} deg.`,
+      heading:
+        mode === 'complementary'
+          ? `Adds to 90 with ${given} deg`
+          : mode === 'supplementary'
+            ? `Adds to 180 with ${given} deg`
+            : `Opposite ${given} deg`,
+      instruction:
+        mode === 'complementary'
+          ? `Munch every angle that makes 90 deg with ${given} deg.`
+          : mode === 'supplementary'
+            ? `Munch every angle that makes 180 deg with ${given} deg.`
+            : `Munch every angle opposite ${given} deg where two lines cross.`,
       correct: correctPool,
       incorrect: incorrectPool,
       correctCount: 9,
@@ -195,7 +203,7 @@ const TRI_LABELS: Record<TriMode, string> = {
 
 const triangleTypes: Topic = {
   id: 'triangle-types',
-  name: 'Triangle Classification',
+  name: 'Triangle Types',
   family: 'geometry',
   band: 'middle',
   grades: 'Grades 6-8',
@@ -353,7 +361,7 @@ const PYTHAGOREAN_CATALOG: [number, number, number][] = [
 
 const pythagorean: Topic = {
   id: 'pythagorean',
-  name: 'Pythagorean Theorem',
+  name: 'Right Triangles',
   family: 'geometry',
   band: 'middle',
   grades: 'Grades 8-10',
@@ -616,7 +624,7 @@ type VolumeMode =
 
 const volume: Topic = {
   id: 'volume',
-  name: 'Volume & Surface Area',
+  name: 'Volume',
   family: 'geometry',
   band: 'high',
   grades: 'Grades 8-11',
@@ -786,7 +794,7 @@ const readMidpointPair = (text: string): [[number, number], [number, number]] | 
 
 const coordinateGeometry: Topic = {
   id: 'coordinate-geometry',
-  name: 'Coordinate Geometry',
+  name: 'Coordinates',
   family: 'geometry',
   band: 'high',
   grades: 'Grades 8-11',
@@ -1033,7 +1041,7 @@ const readRatio = (text: string): [number, number] | null => {
 
 const similarity: Topic = {
   id: 'similarity',
-  name: 'Similar Figures',
+  name: 'Similar Shapes',
   family: 'geometry',
   band: 'high',
   grades: 'Grades 8-11',
@@ -1178,7 +1186,7 @@ type CircleTheoremMode = 'inscribed' | 'cyclic' | 'arc' | 'tangent';
 
 const circleTheorems: Topic = {
   id: 'circle-theorems',
-  name: 'Circle Theorems',
+  name: 'Circle Rules',
   family: 'geometry',
   band: 'high',
   grades: 'Grades 9-12',

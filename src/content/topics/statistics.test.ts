@@ -181,7 +181,7 @@ describe('statistics independent checks', () => {
 
   it('percent-change: recomputes the percent increase or decrease', () => {
     for (const { round } of allRounds(3)) {
-      const m = /^(\d+) -> (\d+): percent change$/.exec(round.heading);
+      const m = /^(\d+) to (\d+): change %$/.exec(round.heading);
       expect(m, round.heading).not.toBeNull();
       const oldValue = Number(m![1]);
       const newValue = Number(m![2]);

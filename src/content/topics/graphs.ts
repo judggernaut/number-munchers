@@ -252,7 +252,7 @@ function buildPool(rng: Rng, level: number, count: number, families: PlotFamily[
 
 const functionFamilies: Topic = {
   id: 'function-families',
-  name: 'Function Families',
+  name: 'Graph Types',
   family: 'algebra',
   band: 'high',
   grades: 'Grades 9-12',
@@ -286,7 +286,7 @@ const functionFamilies: Topic = {
 
     return makeRound({
       rng,
-      heading: 'Function Families',
+      heading: 'Graph Types',
       instruction: `Munch every graph of ${article(FAMILY_LABELS[target])} ${FAMILY_LABELS[target]} function.`,
       correct: matching.map((t) => t.id),
       incorrect: other.map((t) => t.id),
@@ -303,7 +303,7 @@ const functionFamilies: Topic = {
 
 const graphFeatures: Topic = {
   id: 'graph-features',
-  name: 'Graph Features',
+  name: 'Reading Graphs',
   family: 'algebra',
   band: 'high',
   grades: 'Grades 9-12',

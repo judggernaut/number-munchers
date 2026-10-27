@@ -87,7 +87,7 @@ for (const topic of trigonometryTopics) {
 describe('trigonometry independent checks', () => {
   it('trig-ratios: every correct fraction matches the triangle ratio', () => {
     for (const { round } of allRounds(0)) {
-      const m = /^Right tri (\d+)-(\d+)-(\d+): (sin|cos|tan) A$/.exec(round.heading);
+      const m = /^Sides (\d+)-(\d+)-(\d+): (sin|cos|tan) A$/.exec(round.heading);
       expect(m, round.heading).not.toBeNull();
       const [a, b, c] = [Number(m![1]), Number(m![2]), Number(m![3])];
       const fn = m![4];
@@ -138,7 +138,7 @@ describe('trigonometry independent checks', () => {
 
   it('radians-degrees: every tile has the same angle measure', () => {
     for (const { round } of allRounds(3)) {
-      const m = /^Angle: (.+) (deg|rad)$/.exec(round.heading);
+      const m = /^(.+) (deg|rad) in (degrees|radians)$/.exec(round.heading);
       expect(m, round.heading).not.toBeNull();
       const expected = m![2] === 'deg'
         ? Number(m![1])

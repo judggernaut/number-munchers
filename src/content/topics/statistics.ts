@@ -164,7 +164,7 @@ const modeOf = (values: number[]): number => {
 
 const centralTendency: Topic = {
   id: 'central-tendency',
-  name: 'Mean, Median, Mode',
+  name: 'Averages',
   family: 'statistics',
   band: 'middle',
   grades: 'Grades 6-9',
@@ -371,7 +371,7 @@ const nCr = (n: number, r: number): number => nPr(n, r) / factorial(r);
 
 const counting: Topic = {
   id: 'counting',
-  name: 'Counting & Combinations',
+  name: 'Combinations',
   family: 'statistics',
   band: 'high',
   grades: 'Grades 9-12',
@@ -470,7 +470,7 @@ const percentChange: Topic = {
 
     return makeRound({
       rng,
-      heading: `${oldValue} -> ${newValue}: percent change`,
+      heading: `${oldValue} to ${newValue}: change %`,
       instruction: 'Munch every tile equal to the percent change.',
       correct: correctPool,
       incorrect: incorrectPool,
@@ -510,7 +510,7 @@ const quantilePair = (sorted: number[]): [number, number] => {
 
 const spread: Topic = {
   id: 'spread',
-  name: 'Range & IQR',
+  name: 'Data Spread',
   family: 'statistics',
   band: 'high',
   grades: 'Grades 9-11',
@@ -593,7 +593,7 @@ const RATE_SCENARIOS: RateScenario[] = [
 
 const unitRates: Topic = {
   id: 'unit-rates',
-  name: 'Unit Rates',
+  name: 'Rates',
   family: 'statistics',
   band: 'middle',
   grades: 'Grades 6-8',

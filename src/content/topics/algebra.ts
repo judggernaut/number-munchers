@@ -83,7 +83,7 @@ const gcd = (a: number, b: number): number => {
 
 const evaluateExpressions: Topic = {
   id: 'evaluate-expressions',
-  name: 'Evaluate Expressions',
+  name: 'Plug It In',
   family: 'algebra',
   band: 'middle',
   grades: 'Grades 7-9',
@@ -142,7 +142,7 @@ const evaluateExpressions: Topic = {
     return makeRound({
       rng,
       heading: `x = ${x}`,
-      instruction: `Munch every tile equal to ${target}.`,
+      instruction: `Munch every expression equal to ${target} when x = ${x}.`,
       correct,
       incorrect,
       correctCount: 9,
@@ -162,7 +162,7 @@ const evaluateExpressions: Topic = {
 
 const solveLinear: Topic = {
   id: 'solve-linear',
-  name: 'Solve Linear Equations',
+  name: 'Solve for x',
   family: 'algebra',
   band: 'middle',
   grades: 'Grades 7-9',
@@ -235,7 +235,7 @@ const solveLinear: Topic = {
 
 const linearInequalities: Topic = {
   id: 'linear-inequalities',
-  name: 'Linear Inequalities',
+  name: 'Inequalities',
   family: 'algebra',
   band: 'high',
   grades: 'Grades 8-10',
@@ -453,7 +453,7 @@ const slope: Topic = {
 
 const systems: Topic = {
   id: 'systems',
-  name: 'Systems of Equations',
+  name: 'Systems',
   family: 'algebra',
   band: 'high',
   grades: 'Grades 9-11',
@@ -765,7 +765,7 @@ const polyTargets: PolyTarget[] = [
 
 const polynomials: Topic = {
   id: 'polynomials',
-  name: 'Polynomial Operations',
+  name: 'Polynomials',
   family: 'algebra',
   band: 'high',
   grades: 'Grades 9-11',
@@ -962,7 +962,7 @@ const quadTargets: QuadTarget[] = [
 
 const quadratics: Topic = {
   id: 'quadratics',
-  name: 'Quadratic Roots',
+  name: 'Quadratics',
   family: 'algebra',
   band: 'high',
   grades: 'Grades 9-12',
@@ -1379,7 +1379,7 @@ const logCases: LogCase[] = [
 
 const logs: Topic = {
   id: 'logs',
-  name: 'Logarithms',
+  name: 'Logs',
   family: 'algebra',
   band: 'high',
   grades: 'Grades 10-12',

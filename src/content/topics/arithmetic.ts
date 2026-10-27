@@ -426,7 +426,7 @@ const equality: Topic = {
 
 const inequality: Topic = {
   id: 'inequality',
-  name: 'Inequality',
+  name: 'Compare',
   family: 'arithmetic',
   band: 'elementary',
   grades: 'Grades 5-8',
@@ -480,7 +480,7 @@ const inequality: Topic = {
 
     return makeRound({
       rng,
-      heading: `Inequality: ${op} ${threshold}`,
+      heading: `${op === '<' ? 'Less than' : op === '>' ? 'More than' : op === '<=' ? 'At most' : 'At least'} ${threshold}`,
       instruction: `Munch every value ${op} ${threshold}.`,
       correct,
       incorrect,
@@ -514,7 +514,8 @@ const placeValue: Topic = {
   blurb: 'Find the numbers where a chosen digit sits in a chosen place.',
   round(rng: Rng, level: number) {
     const lv = clamp(level, 1, 30);
-    const places = [1, 10, 100];
+    // Units are skipped: "the 2 is worth 2" reads like a trick question.
+    const places = [10, 100];
     if (lv >= 5) places.push(1000);
     if (lv >= 10) places.push(10000);
     if (lv >= 16) places.push(100000);
@@ -651,7 +652,7 @@ const rounding: Topic = {
 
     return makeRound({
       rng,
-      heading: `Round to the nearest ${unit} = ${target}`,
+      heading: `Rounds to ${target}`,
       instruction: `Munch every number that rounds to ${target} at the nearest ${unit}.`,
       correct,
       incorrect,
@@ -679,7 +680,7 @@ const rounding: Topic = {
 
 const fractions: Topic = {
   id: 'fractions',
-  name: 'Equivalent Fractions',
+  name: 'Fractions',
   family: 'arithmetic',
   band: 'middle',
   grades: 'Grades 5-8',
@@ -756,7 +757,7 @@ const fractions: Topic = {
 
 const decimals: Topic = {
   id: 'decimals',
-  name: 'Fractions & Decimals',
+  name: 'Decimals',
   family: 'arithmetic',
   band: 'middle',
   grades: 'Grades 5-8',
@@ -1194,7 +1195,7 @@ const orderCandidatesFor = (target: number): string[] => {
 
 const orderOfOperations: Topic = {
   id: 'order-of-operations',
-  name: 'Order of Operations',
+  name: 'Operations',
   family: 'arithmetic',
   band: 'middle',
   grades: 'Grades 6-9',
@@ -1364,7 +1365,7 @@ const buildExponentMap = (level: number): Map<number, string[]> => {
 
 const exponents: Topic = {
   id: 'exponents',
-  name: 'Exponents & Roots',
+  name: 'Powers & Roots',
   family: 'arithmetic',
   band: 'middle',
   grades: 'Grades 7-9',
@@ -1461,7 +1462,7 @@ const exponents: Topic = {
     return makeRound({
       rng,
       heading: 'Perfect Powers',
-      instruction: 'Munch every tile whose value is a perfect power (a whole number greater than 1 raised to a power of 2 or more).',
+      instruction: 'Munch every perfect power.',
       correct: correctPool,
       incorrect: incorrectPool,
       correctCount,

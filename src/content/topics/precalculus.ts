@@ -365,7 +365,7 @@ const transformCases: TransformCase[] = [
 
 const functionTransformations: Topic = {
   id: 'function-transformations',
-  name: 'Transformations',
+  name: 'Shifts & Flips',
   family: 'precalculus',
   band: 'high',
   grades: 'Grades 10-12',
@@ -800,7 +800,7 @@ const seriesCases: SeriesCase[] = [
 
 const series: Topic = {
   id: 'series',
-  name: 'Series & Summation',
+  name: 'Series',
   family: 'precalculus',
   band: 'high',
   grades: 'Grades 11-12',

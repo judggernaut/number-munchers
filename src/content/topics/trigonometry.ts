@@ -43,7 +43,7 @@ const TRIG_TRIANGLES: [number, number, number][] = [
 
 const trigRatios: Topic = {
   id: 'trig-ratios',
-  name: 'Trig Ratios',
+  name: 'SOH CAH TOA',
   family: 'trigonometry',
   band: 'high',
   grades: 'Grades 9-11',
@@ -91,7 +91,7 @@ const trigRatios: Topic = {
         : `opp=${a}, adj=${b}`;
     return makeRound({
       rng,
-      heading: `Right tri ${a}-${b}-${c}: ${fn} A`,
+      heading: `Sides ${a}-${b}-${c}: ${fn} A`,
       instruction: `Munch every fraction equal to ${fn} A. (${sideHint})`,
       correct: correctPool,
       incorrect: incorrectPool,
@@ -305,7 +305,7 @@ const IDENTITY_DATA: Record<IdentityMode, {
 
 const trigIdentities: Topic = {
   id: 'trig-identities',
-  name: 'Trig Identities',
+  name: 'Identities',
   family: 'trigonometry',
   band: 'high',
   grades: 'Grades 10-12',
@@ -325,7 +325,7 @@ const trigIdentities: Topic = {
 
     return makeRound({
       rng,
-      heading: `Identity ${data.heading}`,
+      heading: data.heading,
       instruction: `Munch every expression equal to ${data.heading}. Use s=sin(x), c=cos(x).`,
       correct: correctPool,
       incorrect: incorrectPool,
@@ -397,7 +397,7 @@ const radianForms = (entry: AngleEntry): string[] => {
 
 const radiansDegrees: Topic = {
   id: 'radians-degrees',
-  name: 'Radians & Degrees',
+  name: 'Radians',
   family: 'trigonometry',
   band: 'high',
   grades: 'Grades 10-12',
@@ -442,8 +442,8 @@ const radiansDegrees: Topic = {
     const display = useDegrees ? `${entry.deg} deg` : `${entry.radText} rad`;
     return makeRound({
       rng,
-      heading: `Angle: ${display}`,
-      instruction: `Munch every tile equal to ${display}.`,
+      heading: `${display} in ${useDegrees ? 'radians' : 'degrees'}`,
+      instruction: `Munch every tile equal to ${display}, written in ${useDegrees ? 'radians' : 'degrees'}.`,
       correct: correctPool,
       incorrect: incorrectPool,
       correctCount: 9,

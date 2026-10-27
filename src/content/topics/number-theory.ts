@@ -31,7 +31,7 @@ const fmt = (n: number): string => String(n);
 /** Prime Numbers: eat the primes, avoid composites and 1. */
 const primes: Topic = {
   id: 'primes',
-  name: 'Prime Numbers',
+  name: 'Primes',
   family: 'number',
   band: 'elementary',
   grades: 'Grades 4-8',
@@ -55,7 +55,7 @@ const primes: Topic = {
 
     return makeRound({
       rng,
-      heading: 'Prime Numbers',
+      heading: 'Primes',
       instruction: 'Munch every prime number.',
       correct: correctPool,
       incorrect: incorrectPool,
@@ -172,7 +172,7 @@ const evenOdd: Topic = {
 /** Perfect squares. */
 const squares: Topic = {
   id: 'perfect-squares',
-  name: 'Perfect Squares',
+  name: 'Squares',
   family: 'number',
   band: 'middle',
   grades: 'Grades 6-9',
@@ -205,7 +205,7 @@ const squares: Topic = {
 /** Divisibility rules for a random small divisor. */
 const divisibility: Topic = {
   id: 'divisibility',
-  name: 'Divisibility Rules',
+  name: 'Divisibility',
   family: 'number',
   band: 'middle',
   grades: 'Grades 5-8',

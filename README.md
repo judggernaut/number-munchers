@@ -60,13 +60,13 @@ pick and walks it in grade order. `Choose Topic` pins a single skill.
 
 | Family | Sample topics |
 | --- | --- |
-| Number sense | primes, factors, multiples, even/odd, perfect squares, divisibility |
-| Arithmetic | equality, inequality, place value, rounding, equivalent fractions, fractions↔decimals, percents, integers, order of operations, exponents & roots |
-| Algebra | evaluate expressions, solve linear equations, linear inequalities, slope, systems, polynomial operations, factoring, quadratic roots, exponent rules, function values, sequences, logarithms, **function families from graphs**, **graph features** |
-| Geometry | angle relationships, triangle classification (numbers and pictures), Pythagorean theorem, area & perimeter, circles, volume & surface area, coordinate geometry, polygons, similar figures, circle theorems, 2D vs 3D shapes, solid properties |
-| Trigonometry | trig ratios, special angles, identities, radians & degrees |
-| Statistics | mean/median/mode, probability, counting, percent change, range & IQR, unit rates |
-| Pre-calculus | transformations, limits, derivatives, series & summation |
+| Number sense | Primes, Factors, Multiples, Even & Odd, Squares, Divisibility |
+| Arithmetic | Equality, Compare, Place Value, Rounding, Fractions, Decimals, Percents, Integers, Operations, Powers & Roots |
+| Algebra | Plug It In, Solve for x, Inequalities, Slope, Systems, Polynomials, Factoring, Quadratics, Exponent Rules, Function Values, Sequences, Logs, **Graph Types**, **Reading Graphs** |
+| Geometry | Angles, Triangle Types, Right Triangles, Area & Perimeter, Circles, Volume, Coordinates, Polygons, Similar Shapes, Circle Rules, **Solids & Flats**, **Solid Clues**, **Triangle Pictures** |
+| Trigonometry | SOH CAH TOA, Special Angles, Identities, Radians |
+| Statistics | Averages, Probability, Combinations, Percent Change, Data Spread, Rates |
+| Pre-calculus | Shifts & Flips, Limits, Derivatives, Series |
 
 Some topics draw instead of writing: `Function Families` shows plots to
 identify (linear, quadratic, cubic, exponential, logarithmic, reciprocal,

@@ -73,7 +73,7 @@ const visualsOf = (tiles: ShapeTile[]): Record<string, TileVisual> => {
 
 const solidOrFlat: Topic = {
   id: 'solid-or-flat',
-  name: 'Solids vs Flat Shapes',
+  name: 'Solids & Flats',
   family: 'geometry',
   band: 'elementary',
   grades: 'Grades 3-6',
@@ -106,7 +106,7 @@ const solidOrFlat: Topic = {
 
 const solidAttributes: Topic = {
   id: 'solid-attributes',
-  name: 'Solid Properties',
+  name: 'Solid Clues',
   family: 'geometry',
   band: 'middle',
   grades: 'Grades 5-8',
