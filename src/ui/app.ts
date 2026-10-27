@@ -175,6 +175,8 @@ export class App {
     this.lastActions = actions;
     const pointer = this.input.takePointer();
     this.lastPointer = pointer ? { x: pointer.x, y: pointer.y } : null;
+    // Any interaction (and every level change) keeps the playlist alive.
+    if (actions.length > 0 || pointer) this.music.resumeIfNeeded();
     this.update(dt, actions, pointer);
     this.draw(now);
     requestAnimationFrame(this.frame);
@@ -259,6 +261,7 @@ export class App {
     for (const action of actions) {
       if (action === 'confirm' || action === 'munch') {
         this.screenId = 'play';
+        this.music.resumeIfNeeded();
         return;
       }
       if (action === 'learn' && this.session) {

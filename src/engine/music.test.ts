@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { nextCursor, parseManifest, shuffleOrder } from './music';
+import { Music, nextCursor, parseManifest, shuffleOrder } from './music';
 
 describe('music manifest', () => {
   it('reads plain file names', () => {
@@ -28,6 +28,16 @@ describe('music manifest', () => {
     expect(parseManifest('nope')).toEqual([]);
     expect(parseManifest({})).toEqual([]);
     expect(parseManifest({ tracks: 'nope' })).toEqual([]);
+  });
+});
+
+describe('music defaults', () => {
+  it('plays quietly by default', () => {
+    expect(new Music().volume).toBe(0.08);
+  });
+
+  it('can be told a different volume', () => {
+    expect(new Music(0.2).volume).toBe(0.2);
   });
 });
 

@@ -155,7 +155,9 @@ so the session never branches on the ruleset id.
 ## Music
 
 `src/engine/music.ts` loads `music/manifest.json` next to the build, shuffles it,
-and plays one HTMLAudioElement at 0.16 volume, advancing on `ended`. Missing
+and plays one HTMLAudioElement at 0.08 volume, advancing on `ended`. `resumeIfNeeded()`
+is called on every gesture and level change, so a track that was blocked by
+autoplay or ended while the tab slept never leaves the game silent. Missing
 folder or a malformed manifest means silence, never an error. Playback starts
 from the first real user gesture, once, via a one-shot listener in `main.ts`.
 Manifest entries are validated (plain file names only, no paths or URLs) and the

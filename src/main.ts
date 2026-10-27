@@ -33,7 +33,7 @@ async function boot(): Promise<void> {
   const audio = new Audio(false);
   const sprites = await loadSprites();
 
-  const music = new Music(0.16);
+  const music = new Music(0.08);
   await music.load();
 
   const app = new App(screen, input, audio, sprites, music);

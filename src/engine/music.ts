@@ -51,9 +51,9 @@ export class Music {
   private enabled = true;
   private started = false;
   private failures = 0;
-  private readonly volume: number;
+  readonly volume: number;
 
-  constructor(volume = 0.16) {
+  constructor(volume = 0.08) {
     this.volume = volume;
   }
 
@@ -88,6 +88,16 @@ export class Music {
   start(): void {
     this.started = true;
     if (this.enabled) this.playCurrent();
+  }
+
+  /**
+   * Nudge playback back to life. Called on every user gesture and on level
+   * changes so a blocked/ended track never leaves the game silent.
+   */
+  resumeIfNeeded(): void {
+    if (!this.enabled || !this.started) return;
+    if (this.element && !this.element.paused) return;
+    this.playCurrent();
   }
 
   setEnabled(on: boolean): void {
