@@ -1,0 +1,11 @@
+Background music for Number Munchers.
+
+These tracks are licensed to the project owner and are NOT free to reuse,
+redistribute, remix, or re-upload. File names are intentionally opaque
+(UUIDs) to avoid the tracks being indexed or matched by name.
+
+If you are reading this because you found the files in a build: they are
+licensed material, not part of the open-source game. The game code is
+Apache-2.0; the audio is not.
+
+Music (c) their respective composers, used under licence.

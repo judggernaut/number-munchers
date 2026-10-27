@@ -2,6 +2,7 @@ import './style.css';
 
 import { Audio } from './engine/audio';
 import { Input } from './engine/input';
+import { Music } from './engine/music';
 import { Screen, VIEW_H, VIEW_W } from './engine/screen';
 import { loadSprites } from './engine/sprites';
 import { App } from './ui/app';
@@ -32,8 +33,20 @@ async function boot(): Promise<void> {
   const audio = new Audio(false);
   const sprites = await loadSprites();
 
-  const app = new App(screen, input, audio, sprites);
+  const music = new Music(0.16);
+  await music.load();
+
+  const app = new App(screen, input, audio, sprites, music);
   app.start();
+
+  // Autoplay rules need a real gesture; the first one starts the playlist.
+  const kick = (): void => {
+    music.start();
+    window.removeEventListener('pointerdown', kick);
+    window.removeEventListener('keydown', kick);
+  };
+  window.addEventListener('pointerdown', kick);
+  window.addEventListener('keydown', kick);
 
   canvas.addEventListener('pointerdown', () => canvas.focus());
   canvas.setAttribute('tabindex', '0');

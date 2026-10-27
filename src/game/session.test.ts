@@ -261,7 +261,7 @@ describe('classic ruleset behaviour', () => {
 });
 
 describe('session troggle pressure', () => {
-  it('loses a life when a troggle walks onto the muncher', () => {
+  it('plays a death animation before losing a life', () => {
     const board = roundWith([]);
     const game = session(board, { troggleTickMs: () => 50 });
     const hunter: Troggle = {
@@ -276,10 +276,49 @@ describe('session troggle pressure', () => {
     };
     game.troggles = [hunter];
     game.update(150, [], null);
-    expect(game.lives).toBe(2);
-    expect(game.status).toBe('eaten');
+    // Contact starts the animation; the life is not gone yet.
+    expect(game.status).toBe('dying');
+    expect(game.lives).toBe(3);
     expect(game.troggles).toHaveLength(0);
+    expect(game.shake).toBeGreaterThan(0);
+
+    game.update(500, [], null);
+    expect(game.status).toBe('dying');
+    expect(game.lives).toBe(3);
+
+    game.update(450, [], null);
+    expect(game.status).toBe('eaten');
+    expect(game.lives).toBe(2);
     expect(game.muncherCell).toEqual({ col: 2, row: 2 });
+  });
+
+  it('goes straight to game over when the last life is chomped', () => {
+    const board = roundWith([]);
+    const game = new GameSession({
+      sprites: stubSprites,
+      rng: createRng(3),
+      difficulty: 'normal',
+      rules: { ...fastRules, troggleTickMs: () => 50 },
+      roundFor: () => ({ topic: makeTopic(() => board), round: board }),
+      lives: 1,
+    });
+    game.troggles = [
+      {
+        id: 9,
+        species: 'smarticus',
+        col: 2,
+        row: 1,
+        dir: { dc: 0, dr: 1 },
+        fromCol: 2,
+        fromRow: 1,
+        steppedAt: 0,
+      },
+    ];
+    game.update(150, [], null);
+    expect(game.status).toBe('dying');
+    game.update(950, [], null);
+    expect(game.status).toBe('gameover');
+    expect(game.lives).toBe(0);
   });
 
   it('never walks the muncher off the board', () => {

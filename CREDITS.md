@@ -31,8 +31,12 @@ downloaded at runtime.
 
 ## Audio and cutscenes
 
-All sound is synthesised at runtime with WebAudio oscillators; no audio samples
-were taken from the original game. The between-level interludes are original,
+Sound effects are synthesised at runtime with WebAudio oscillators; no audio
+samples were taken from the original game.
+
+Background music is licensed stock, used under licence by the project owner and
+kept out of the open-source licence: see `public/music/NOTICE.txt`. The tracks
+are not part of the Apache-2.0 grant and may not be reused. The between-level interludes are original,
 sprite-based animations written for this project. The original `SCPT` scene
 resources were inventoried during the research pass but are neither extracted
 nor redistributed.

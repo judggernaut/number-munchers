@@ -28,6 +28,7 @@ const KEY_MAP: Record<string, Action> = {
   Space: 'munch',
   Escape: 'cancel',
   KeyP: 'pause',
+  KeyQ: 'cancel',
   KeyL: 'learn',
   KeyM: 'mute',
   Backspace: 'cancel',

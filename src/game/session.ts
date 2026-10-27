@@ -15,6 +15,7 @@ import {
 import {
   SPECIES_COLORS,
   SPECIES_NAMES,
+  type TroggleSpecies,
   collides,
   erasesTiles,
   rerollsTiles,
@@ -25,11 +26,21 @@ import {
 } from './troggle';
 
 export const BOARD = { cols: 6, rows: 5, x: 128, y: 56, cell: 64 } as const;
+
+/** Tappable pause chip in the footer, mirrored by the app's hit test. */
+export const PAUSE_BUTTON = { x: 570, y: 376, w: 62, h: 20 } as const;
 const CENTER: Cell = { col: 2, row: 2 };
 /** How long a direction must be held before auto-repeat kicks in. */
 const HOLD_REPEAT_DELAY_MS = 260;
 
-export type SessionStatus = 'play' | 'wrong' | 'eaten' | 'clear' | 'interlude' | 'gameover';
+export type SessionStatus =
+  | 'play'
+  | 'wrong'
+  | 'eaten'
+  | 'clear'
+  | 'interlude'
+  | 'gameover'
+  | 'dying';
 
 export interface SessionEvent {
   type: 'munch' | 'wrong' | 'death' | 'levelClear' | 'gameOver' | 'spawn' | 'interlude';
@@ -85,6 +96,7 @@ export class GameSession {
   private nextTickMs = 0;
   private nextExtraLife = 0;
   private interludeStartedAt = 0;
+  private deathAnim: { species: TroggleSpecies; progress: number } | null = null;
 
   constructor(deps: SessionDeps) {
     this.deps = deps;
@@ -163,6 +175,15 @@ export class GameSession {
   update(dt: number, actions: Action[], heldDir: { dc: number; dr: number } | null): void {
     if (this.status === 'gameover') return;
 
+    // Getting eaten gets its own beat: chomp, shake, then the message.
+    if (this.status === 'dying') {
+      const anim = this.deathAnim;
+      if (anim) anim.progress = Math.min(1, anim.progress + dt / 900);
+      if (anim && anim.progress >= 1) this.finishDeath();
+      this.decayEffects(dt);
+      return;
+    }
+
     if (this.status !== 'play') {
       for (const action of actions) {
         if (action === 'confirm' || action === 'munch') this.advanceStatus();
@@ -177,7 +198,8 @@ export class GameSession {
   }
 
   private decayEffects(dt: number): void {
-    this.shake = Math.max(0, this.shake - dt * 0.05);
+    // ~0.8 s of visible shake from a full-strength hit.
+    this.shake = this.shake > 0.15 ? Math.max(0, this.shake - dt * 0.02) : 0;
   }
 
   private muncherTick(
@@ -439,16 +461,27 @@ export class GameSession {
   private checkContact(): void {
     const hit = this.troggles.find((t) => collides(t, this.muncherCell));
     if (!hit) return;
-    this.lives -= 1;
-    this.shake = 10;
-    this.message = `Yikes! You were eaten by a ${SPECIES_NAMES[hit.species]}.`;
-    this.prompt = 'SPACE TRY AGAIN  ·  L LEARN';
-    this.emit('death', hit.species);
+    // Freeze the board on the contact frame; the death animation owns the next
+    // 900 ms, then the message appears.
     this.troggles = [];
+    this.status = 'dying';
+    this.deathAnim = { species: hit.species, progress: 0 };
+    this.shake = 16;
+    this.emit('death', hit.species);
+    if (typeof navigator !== 'undefined') navigator.vibrate?.(120);
+  }
+
+  private finishDeath(): void {
+    const species = this.deathAnim?.species ?? 'normalus';
+    this.deathAnim = null;
+    this.lives -= 1;
+    this.message = `Yikes! You were eaten by a ${SPECIES_NAMES[species]}.`;
+    this.prompt = 'SPACE TRY AGAIN  ·  L LEARN';
     this.muncher.col = CENTER.col;
     this.muncher.row = CENTER.row;
     this.muncher.fromCol = CENTER.col;
     this.muncher.fromRow = CENTER.row;
+    this.clickTarget = null;
     if (this.lives <= 0) this.gameOver();
     else this.status = 'eaten';
   }
@@ -486,7 +519,7 @@ export class GameSession {
     this.drawActors(screen, now);
     this.drawFooter(screen, now);
 
-    if (this.status !== 'play') this.drawOverlay(screen, pulse);
+    if (this.status !== 'play' && this.status !== 'dying') this.drawOverlay(screen, pulse);
     screen.end();
   }
 
@@ -594,6 +627,45 @@ export class GameSession {
     const mRow = lerp(this.muncher.fromRow, this.muncher.row, this.muncher.movedAt, 90);
     const mx = x + mCol * cell + cell / 2;
     const my = y + mRow * cell + cell / 2;
+
+    if (this.status === 'dying' && this.deathAnim) {
+      const p = this.deathAnim.progress;
+      // Chomp: the Troggle lunges over the Muncher and gulps.
+      const lunge = Math.min(1, p * 2.2);
+      const chomp = 1 + 0.45 * Math.sin(Math.min(1, p * 1.6) * Math.PI);
+      const muncherScale = Math.max(0, 1 - p * 1.25);
+      const spin = p * Math.PI * 1.6;
+
+      // Red impact flash behind the pair.
+      screen.rect(mx - 34, my - 34, 68, 68, '#ff2b2b', 0.35 * (1 - p));
+      screen.spriteTransformed(
+        this.deps.sprites.troggles[this.deathAnim.species],
+        mx,
+        my - 4 * lunge,
+        58 * chomp + 6 * p,
+        lunge,
+        0,
+        1,
+      );
+      if (muncherScale > 0.02) {
+        screen.spriteTransformed(
+          this.deps.sprites.muncherSad,
+          mx,
+          my,
+          56,
+          muncherScale,
+          spin,
+          1,
+        );
+      }
+      // Burst ring at the moment of contact.
+      if (p < 0.5) {
+        const r = 16 + p * 90;
+        screen.stroke(mx - r, my - r, r * 2, r * 2, '#ffd85a', 2);
+      }
+      return;
+    }
+
     const muncherSprite =
       this.status === 'eaten' || this.status === 'gameover'
         ? this.deps.sprites.muncherSad
@@ -615,7 +687,14 @@ export class GameSession {
     screen.rect(484, 387, Math.round(92 * danger), 4, meterColor);
 
     void now;
-    screen.text('ESC MENU', 628, 384, { size: 8, color: '#4462b8', align: 'right' });
+    // Pointer users have no Esc key; this chip opens the pause menu.
+    screen.rect(PAUSE_BUTTON.x, PAUSE_BUTTON.y, PAUSE_BUTTON.w, PAUSE_BUTTON.h, '#0d1740');
+    screen.stroke(PAUSE_BUTTON.x, PAUSE_BUTTON.y, PAUSE_BUTTON.w, PAUSE_BUTTON.h, '#3450ff', 1);
+    screen.text('MENU', PAUSE_BUTTON.x + PAUSE_BUTTON.w / 2, PAUSE_BUTTON.y + 6, {
+      size: 8,
+      align: 'center',
+      color: '#5f7fd0',
+    });
   }
 
   private drawOverlay(screen: Screen, pulse: number): void {

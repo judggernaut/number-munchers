@@ -152,6 +152,15 @@ them lives in the interface - points per level, tick length and jitter, initial
 troggles, species unlock schedule, interlude cadence, tile churn, extra lives -
 so the session never branches on the ruleset id.
 
+## Music
+
+`src/engine/music.ts` loads `music/manifest.json` next to the build, shuffles it,
+and plays one HTMLAudioElement at 0.16 volume, advancing on `ended`. Missing
+folder or a malformed manifest means silence, never an error. Playback starts
+from the first real user gesture, once, via a one-shot listener in `main.ts`.
+Manifest entries are validated (plain file names only, no paths or URLs) and the
+playlist logic is unit-tested.
+
 ## Interludes
 
 Between levels the session draws a short scripted scene (Muncher runs, Troggle

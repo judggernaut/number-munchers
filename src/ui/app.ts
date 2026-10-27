@@ -6,6 +6,7 @@ import { BAND_LABELS, type Band, type Topic } from '../content/types';
 import { Audio } from '../engine/audio';
 import type { Action, Input } from '../engine/input';
 import { Screen, VIEW_H, VIEW_W } from '../engine/screen';
+import type { Music } from '../engine/music';
 import type { Sprites } from '../engine/sprites';
 import {
   DIFFICULTY_LABELS,
@@ -15,9 +16,10 @@ import {
   type RulesetId,
 } from '../game/rules';
 import { planLesson } from './lesson-view';
+import { PAUSE_ITEMS, cycleIndex, rowAt } from './menu-nav';
 import { wrapToWidth } from './text-layout';
 import { drawVisual } from '../engine/visuals';
-import { GameSession, type SessionEvent } from '../game/session';
+import { GameSession, PAUSE_BUTTON, type SessionEvent } from '../game/session';
 
 const C = {
   bg: '#000574',
@@ -46,6 +48,7 @@ interface Settings {
   difficulty: DifficultyId;
   ruleset: RulesetId;
   muted: boolean;
+  music: boolean;
 }
 
 interface ScoreEntry {
@@ -67,6 +70,7 @@ const DEFAULT_SETTINGS: Settings = {
   difficulty: 'normal',
   ruleset: 'modern',
   muted: false,
+  music: true,
 };
 
 const DIFFICULTIES: DifficultyId[] = ['chill', 'normal', 'fast'];
@@ -77,6 +81,7 @@ export class App {
   private readonly input: Input;
   private readonly audio: Audio;
   private readonly sprites: Sprites;
+  private readonly music: Music;
 
   private screenId: ScreenId = 'menu';
   private settings: Settings = DEFAULT_SETTINGS;
@@ -99,13 +104,15 @@ export class App {
   private stars: Array<{ x: number; y: number; s: number; c: string }> = [];
   private startedAt = performance.now();
   private lastActions: Action[] = [];
+  private lastPointer: { x: number; y: number } | null = null;
   private lastFrame = performance.now();
 
-  constructor(screen: Screen, input: Input, audio: Audio, sprites: Sprites) {
+  constructor(screen: Screen, input: Input, audio: Audio, sprites: Sprites, music: Music) {
     this.screen = screen;
     this.input = input;
     this.audio = audio;
     this.sprites = sprites;
+    this.music = music;
     this.loadSettings();
     this.buildStars();
     this.buildMenu();
@@ -132,9 +139,14 @@ export class App {
       troggles: this.session?.troggles.map((t) => t.species),
       message: this.session?.message,
       lastActions: this.lastActions,
+      lastPointer: this.lastPointer,
+      pauseIndex: this.pauseIndex,
       prompt: this.session?.prompt,
       heading: this.session?.round.heading,
       topic: this.session?.topic.id,
+      musicTracks: this.music.trackCount,
+      musicEnabled: this.music.isEnabled,
+      musicPlaying: this.music.isPlaying,
     };
   }
 
@@ -162,6 +174,7 @@ export class App {
     const actions = this.input.drain();
     this.lastActions = actions;
     const pointer = this.input.takePointer();
+    this.lastPointer = pointer ? { x: pointer.x, y: pointer.y } : null;
     this.update(dt, actions, pointer);
     this.draw(now);
     requestAnimationFrame(this.frame);
@@ -190,6 +203,7 @@ export class App {
       this.scores = [];
     }
     this.audio.setMuted(this.settings.muted);
+    this.music.setEnabled(this.settings.music && !this.settings.muted);
     this.bandIndex = Math.max(0, BANDS.indexOf(this.settings.band));
   }
 
@@ -252,8 +266,9 @@ export class App {
         return;
       }
       if (action === 'cancel') {
+        // Backing out of the briefing goes home, not to the picker.
         this.session = null;
-        this.screenId = 'topics';
+        this.screenId = 'menu';
         return;
       }
     }
@@ -272,6 +287,11 @@ export class App {
         return;
       }
     }
+  }
+
+  /** Row under a pointer press in the pause panel. */
+  private pauseRowAt(y: number): number {
+    return rowAt(y, 170, 24, PAUSE_ITEMS.length);
   }
 
   private quitToMenu(): void {
@@ -388,12 +408,21 @@ export class App {
     for (const action of actions) {
       if (action === 'mute') {
         this.settings.muted = this.audio.toggle();
+        this.music.setEnabled(this.settings.music && !this.settings.muted);
         this.saveSettings();
       }
     }
 
     if (this.screenId === 'play' && this.session) {
       if (this.paused) {
+        if (pointer) {
+          const row = this.pauseRowAt(pointer.y);
+          if (row >= 0) {
+            this.pauseIndex = row;
+            this.updatePause(['confirm']);
+            return;
+          }
+        }
         this.updatePause(actions);
         return;
       }
@@ -417,6 +446,19 @@ export class App {
         this.openLesson(this.session.topic, 'play');
         return;
       }
+      // Tapping the footer MENU chip opens the pause menu.
+      if (
+        pointer &&
+        pointer.x >= PAUSE_BUTTON.x &&
+        pointer.x <= PAUSE_BUTTON.x + PAUSE_BUTTON.w &&
+        pointer.y >= PAUSE_BUTTON.y &&
+        pointer.y <= PAUSE_BUTTON.y + PAUSE_BUTTON.h
+      ) {
+        this.paused = true;
+        this.pauseIndex = 0;
+        return;
+      }
+
       const heldDir = this.heldDirection();
       if (pointer?.cell) this.session.pointTo(pointer.cell);
       this.session.update(dt, actions, heldDir);
@@ -463,22 +505,40 @@ export class App {
   private updatePause(actions: Action[]): void {
     for (const action of actions) {
       if (action === 'up' || action === 'down') {
-        this.pauseIndex = this.pauseIndex === 0 ? 1 : 0;
+        const delta = action === 'down' ? 1 : -1;
+        this.pauseIndex = cycleIndex(this.pauseIndex, delta, PAUSE_ITEMS.length);
         this.audio.play('menu');
       } else if (action === 'confirm' || action === 'munch') {
-        if (this.pauseIndex === 0) {
-          this.paused = false;
-        } else {
-          this.quitToMenu();
-          return;
-        }
+        this.activatePauseItem();
+        if (this.screenId !== 'play' || !this.paused) return;
+      } else if (action === 'learn') {
+        if (this.session) this.openLesson(this.session.topic, 'play');
+        return;
       } else if (action === 'cancel') {
-        // Esc backs all the way out to the menu; Enter resumes.
+        // Esc backs all the way out to the menu.
         this.quitToMenu();
         return;
       } else if (action === 'pause') {
         this.paused = false;
+        return;
       }
+    }
+  }
+
+  private activatePauseItem(): void {
+    const item = PAUSE_ITEMS[this.pauseIndex] ?? PAUSE_ITEMS[0];
+    switch (item) {
+      case 'RESUME':
+        this.paused = false;
+        break;
+      case 'LEARN THIS TOPIC':
+        if (this.session) this.openLesson(this.session.topic, 'play');
+        break;
+      case 'QUIT TO MENU':
+        this.quitToMenu();
+        break;
+      default:
+        break;
     }
   }
 
@@ -574,9 +634,9 @@ export class App {
     actions: Action[],
     pointer: { x: number; y: number } | null,
   ): void {
-    const rows = 6;
+    const rows = 7;
     if (pointer) {
-      const row = Math.floor((pointer.y - 110) / 36);
+      const row = Math.floor((pointer.y - 100) / 32);
       if (row >= 0 && row < rows) {
         this.optionsIndex = row;
         this.activateOption();
@@ -617,6 +677,11 @@ export class App {
         this.settings.ruleset = RULESET_IDS[(index + delta + RULESET_IDS.length) % RULESET_IDS.length]!;
         break;
       }
+      case 3: {
+        this.settings.music = !this.settings.music;
+        this.music.setEnabled(this.settings.music && !this.settings.muted);
+        break;
+      }
       default:
         break;
     }
@@ -631,17 +696,18 @@ export class App {
       case 2:
         this.cycleOption(1);
         break;
-      case 3:
+      case 4:
         this.settings.muted = this.audio.toggle();
+        this.music.setEnabled(this.settings.music && !this.settings.muted);
         this.saveSettings();
         this.audio.play('select');
         break;
-      case 4:
+      case 5:
         this.scores = [];
         this.saveScores();
         this.audio.play('wrong');
         break;
-      case 5:
+      case 6:
         this.screenId = 'menu';
         break;
       default:
@@ -849,13 +915,17 @@ export class App {
       { label: 'DIFFICULTY', value: DIFFICULTY_LABELS[this.settings.difficulty].toUpperCase() },
       { label: 'GRADE BAND', value: BAND_LABELS[this.settings.band].toUpperCase() },
       { label: 'RULES', value: RULESETS[this.settings.ruleset].label.toUpperCase() },
+      {
+        label: 'MUSIC',
+        value: this.settings.music ? `ON (${this.music.trackCount} TRACKS)` : 'OFF',
+      },
       { label: 'SOUND', value: this.audio.isMuted ? 'OFF' : 'ON' },
       { label: 'CLEAR HIGH SCORES', value: 'PRESS ENTER' },
       { label: 'BACK', value: '' },
     ];
 
     rows.forEach((row, index) => {
-      const y = 110 + index * 36;
+      const y = 100 + index * 32;
       const selected = index === this.optionsIndex;
       if (selected) {
         this.screen.rect(120, y - 6, 400, 30, '#0000a8', 0.85);
@@ -1008,8 +1078,7 @@ export class App {
     this.screen.rect(0, 0, VIEW_W, VIEW_H, '#000010', 0.55);
     this.screen.panel(180, 120, 280, 156, { fill: C.panel, border: C.accent, inner: '#3450ff' });
     this.screen.text('PAUSED', 320, 134, { size: 18, align: 'center', color: C.ink });
-    const items = ['RESUME', 'LEARN THIS TOPIC', 'QUIT TO MENU'];
-    items.forEach((item, index) => {
+    PAUSE_ITEMS.forEach((item, index) => {
       const selected = index === this.pauseIndex;
       this.screen.text(`${selected ? '> ' : '  '}${item}`, 320, 176 + index * 24, {
         size: 13,

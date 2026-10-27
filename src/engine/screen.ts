@@ -172,6 +172,28 @@ export class Screen {
     this.ctx.drawImage(img, Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h));
   }
 
+  /** Sprite with scale and rotation, for hit/death flourishes. */
+  spriteTransformed(
+    img: HTMLImageElement,
+    cx: number,
+    cy: number,
+    box: number,
+    scale = 1,
+    rotation = 0,
+    alpha = 1,
+  ): void {
+    const { ctx } = this;
+    const fit = Math.min(box / img.width, box / img.height);
+    const w = img.width * fit * scale;
+    const h = img.height * fit * scale;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(cx, cy);
+    ctx.rotate(rotation);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
   /** Simple starfield used behind menus. */
   stars(stars: Array<{ x: number; y: number; s: number; c: string }>, t: number): void {
     for (const star of stars) {
