@@ -2,6 +2,7 @@ import type { Rng, TileVisual, Topic } from '../content/types';
 import type { Sprites } from '../engine/sprites';
 import type { Screen } from '../engine/screen';
 import { drawVisual } from '../engine/visuals';
+import { drawTile, type TileCanvas } from './tile-render';
 import { planOverlay, wrapToWidth } from '../ui/text-layout';
 import type { Action } from '../engine/input';
 import {
@@ -567,8 +568,12 @@ export class GameSession {
       inner: '#3450ff',
     });
 
-    const hovering = this.deps.sprites !== undefined;
-    void hovering;
+    // Tile drawing gets only what a tile looks like - never whether it is
+    // correct. Same content, same pixels, no board-reading by colour.
+    const tileCanvas: TileCanvas = {
+      text: (str, px, py, style) => screen.text(str, px, py, style),
+      drawVisual: (visual, visualBox) => drawVisual(screen.ctx, visual, visualBox),
+    };
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
@@ -576,27 +581,14 @@ export class GameSession {
         const cellData = this.cells[idx];
         const cx = x + col * cell;
         const cy = y + row * cell;
-        const isMuncher = col === this.muncher.col && row === this.muncher.row;
         const tint = (col + row) % 2 === 0 ? '#04046b' : '#06067d';
         screen.rect(cx + 2, cy + 2, cell - 4, cell - 4, tint);
         screen.stroke(cx + 2, cy + 2, cell - 4, cell - 4, '#1b2fb5', 1);
 
         if (!cellData || cellData.eaten || cellData.text === '') continue;
-        if (isMuncher) continue;
+        if (col === this.muncher.col && row === this.muncher.row) continue;
 
-        if (cellData.visual) {
-          drawVisual(screen.ctx, cellData.visual, { x: cx + 6, y: cy + 6, w: cell - 12, h: cell - 12 });
-          continue;
-        }
-
-        const text = cellData.text;
-        const size = text.length <= 3 ? 24 : text.length <= 5 ? 19 : text.length <= 7 ? 15 : 12;
-        screen.text(text, cx + cell / 2, cy + cell / 2, {
-          size,
-          align: 'center',
-          baseline: 'middle',
-          color: cellData.correct ? '#ffffff' : '#d6d6ff',
-        });
+        drawTile(tileCanvas, cellData, { x: cx, y: cy, w: cell, h: cell });
       }
     }
 
