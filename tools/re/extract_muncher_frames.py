@@ -41,8 +41,9 @@ PALETTE = {
     111: (4, 88, 0),
 }
 
-# The fullest silhouette is the closed-mouth pose used for standing/walking.
-REST_FRAME = 3
+# The neutral pose (mouth line visible) is the sheet's first frame. Picking by
+# silhouette fullness was wrong: the fullest frame has no mouth line at all.
+REST_FRAME = 0
 
 
 def decode_pcx_indices(path):
