@@ -165,14 +165,23 @@ export class Screen {
   }
 
   /** Draw a sprite centred in a cell, preserving aspect ratio. */
-  sprite(img: HTMLImageElement, cx: number, cy: number, box: number): void {
+  sprite(img: HTMLImageElement, cx: number, cy: number, box: number, flipX = false): void {
     const scale = Math.min(box / img.width, box / img.height);
     const w = img.width * scale;
     const h = img.height * scale;
-    this.ctx.drawImage(img, Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h));
+    if (!flipX) {
+      this.ctx.drawImage(img, Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h));
+      return;
+    }
+    const { ctx } = this;
+    ctx.save();
+    ctx.translate(Math.round(cx), 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(img, -w / 2, Math.round(cy - h / 2), Math.round(w), Math.round(h));
+    ctx.restore();
   }
 
-  /** Sprite with scale and rotation, for hit/death flourishes. */
+  /** Sprite with scale, rotation and optional mirroring, for flourishes. */
   spriteTransformed(
     img: HTMLImageElement,
     cx: number,
@@ -181,6 +190,7 @@ export class Screen {
     scale = 1,
     rotation = 0,
     alpha = 1,
+    flipX = false,
   ): void {
     const { ctx } = this;
     const fit = Math.min(box / img.width, box / img.height);
@@ -190,6 +200,7 @@ export class Screen {
     ctx.globalAlpha = alpha;
     ctx.translate(cx, cy);
     ctx.rotate(rotation);
+    if (flipX) ctx.scale(-1, 1);
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.restore();
   }

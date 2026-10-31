@@ -1,9 +1,34 @@
 import { describe, expect, it } from 'vitest';
 
-import { MUNCH_ANIM_MS, MUNCH_FRAME_MS, isMunching, muncherFrameIndex } from './muncher-frames';
+import {
+  MUNCH_ANIM_MS,
+  MUNCH_FRAME_MS,
+  isMunching,
+  muncherFrameIndex,
+  nextFacing,
+} from './muncher-frames';
 
 // The original munch is one pass of frames 0..6 over ~240 ms.
 const FRAMES = 7;
+
+describe('facing', () => {
+  it('flips on horizontal movement', () => {
+    expect(nextFacing(1, -1)).toBe(-1);
+    expect(nextFacing(-1, 1)).toBe(1);
+  });
+
+  it('keeps the current facing on vertical movement or standing', () => {
+    expect(nextFacing(-1, 0)).toBe(-1);
+    expect(nextFacing(1, 0)).toBe(1);
+    expect(nextFacing(-1, 1)).toBe(1); // only horizontal changes it
+  });
+
+  it('starts facing right', () => {
+    // The session's default is 1; nextFacing never invents a third value.
+    expect(nextFacing(1, 0)).toBe(1);
+    expect(Math.abs(nextFacing(-1, -1))).toBe(1);
+  });
+});
 
 describe('muncher frame selection', () => {
   it('plays one pass of the original 7-frame sequence', () => {

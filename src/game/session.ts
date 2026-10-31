@@ -2,7 +2,7 @@ import type { Rng, TileVisual, Topic } from '../content/types';
 import type { Sprites } from '../engine/sprites';
 import type { Screen } from '../engine/screen';
 import { drawVisual } from '../engine/visuals';
-import { isMunching, muncherFrameIndex } from './muncher-frames';
+import { isMunching, muncherFrameIndex, nextFacing, type Facing } from './muncher-frames';
 import { drawTile, type TileCanvas } from './tile-render';
 import { planOverlay, wrapToWidth } from '../ui/text-layout';
 import type { Action } from '../engine/input';
@@ -95,6 +95,7 @@ export class GameSession {
   /** Animation clock (ms, dt-accumulated so tests stay deterministic). */
   private animClock = 0;
   private munchAnimAt = -1;
+  private muncherFacing: Facing = 1;
   private holdMs = 0;
   private clickTarget: Cell | null = null;
   private nextTroggleId = 1;
@@ -296,6 +297,7 @@ export class GameSession {
   }
 
   private moveBy(dc: number, dr: number): void {
+    this.muncherFacing = nextFacing(this.muncherFacing, dc);
     const next = {
       col: Math.min(BOARD.cols - 1, Math.max(0, this.muncher.col + dc)),
       row: Math.min(BOARD.rows - 1, Math.max(0, this.muncher.row + dr)),
@@ -656,6 +658,7 @@ export class GameSession {
           muncherScale,
           spin,
           1,
+          this.muncherFacing < 0,
         );
       }
       // Burst ring at the moment of contact.
@@ -672,7 +675,7 @@ export class GameSession {
         : this.status === 'clear' || this.status === 'interlude'
           ? this.deps.sprites.muncherHappy
           : this.animateMuncherSprite();
-    screen.sprite(muncherSprite, mx, my, 60);
+    screen.sprite(muncherSprite, mx, my, 60, this.muncherFacing < 0);
   }
 
   /**

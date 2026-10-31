@@ -153,8 +153,9 @@ Two folders load at runtime and degrade gracefully when missing:
 | `music/` | licensed background tracks + manifest | game runs silent |
 | `sprites/muncher/` | 1990 Muncher frames + rest pose + manifest | static bundled Muncher |
 
-The Muncher plays one 7-frame pass per munch (240 ms) and holds a single
-static rest pose otherwise - the frame roles come from the original binary
+The Muncher plays one 7-frame pass per munch (240 ms), holds a single static
+rest pose otherwise, and mirrors horizontally when it last walked left
+(`nextFacing` keeps the facing through vertical moves, like a platformer) - the frame roles come from the original binary
 (`docs/re/muncher-animation.md`): munch = frames 0-6, stand/walk = frame 4
 (walk uses frame 3, the same bitmap), so the mouth only moves to munch.
 

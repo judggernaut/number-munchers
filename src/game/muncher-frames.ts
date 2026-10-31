@@ -24,6 +24,19 @@ export function muncherFrameIndex(munchElapsed: number | null, frameCount: numbe
   return Math.floor(munchElapsed / MUNCH_FRAME_MS) % frameCount;
 }
 
+/**
+ * Facing direction: 1 = right, -1 = left. Vertical movement keeps the current
+ * facing, exactly like a platformer, so the Muncher always chomps toward the
+ * way it last walked.
+ */
+export type Facing = 1 | -1;
+
+export function nextFacing(current: Facing, dc: number): Facing {
+  if (dc > 0) return 1;
+  if (dc < 0) return -1;
+  return current;
+}
+
 /** True while a munch animation is still playing. */
 export function isMunching(munchElapsed: number | null): boolean {
   return munchElapsed !== null && munchElapsed >= 0 && munchElapsed < MUNCH_ANIM_MS;
