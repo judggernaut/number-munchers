@@ -10,9 +10,13 @@
  *   - frame 2 is the wrong-munch pose, frame 6 the caught-by-Troggle pose
  */
 
-/** One full munch: 7 frames at the scheduler's ~34.32 ms tick. */
-export const MUNCH_ANIM_MS = 240;
-export const MUNCH_FRAME_MS = 240 / 7;
+/**
+ * One full munch: the original's 7-frame pass. The binary ticks it at
+ * ~34 ms/frame (240 ms total), which is too fast to read at 60 fps, so the
+ * pass plays at 70 ms/frame (490 ms) - same sequence, visible chomp.
+ */
+export const MUNCH_ANIM_MS = 490;
+export const MUNCH_FRAME_MS = 70;
 
 /**
  * Frame index within the munch cycle. Returns 0 outside a munch; the caller

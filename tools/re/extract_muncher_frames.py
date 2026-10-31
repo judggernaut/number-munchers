@@ -34,15 +34,18 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SHEET = os.path.join(HERE, 'out', 'res', 'NMCGA', 'PCXF_00_id1006.bin')
 BTMP = os.path.join(HERE, 'out', 'res', 'NMCGA', 'BTMP_00_id1006.bin')
 
-# index -> (r, g, b); index 0 is the sheet background.
+# index -> (r, g, b); index 0 is the sheet background. Verified against the
+# published rip of the same artwork, frame by frame: the small frames' body is
+# the BRIGHT green (104 -> 0,228,0), the dark green (0,128,0) only appears in
+# the large title Muncher on a different resource.
 PALETTE = {
     0: (0, 0, 120),
-    104: (0, 128, 0),
-    108: (0, 228, 0),
-    3: (8, 132, 0),
-    109: (252, 252, 252),
-    110: (4, 112, 0),
-    111: (4, 88, 0),
+    104: (0, 228, 0),
+    108: (8, 132, 0),
+    3: (252, 252, 252),
+    109: (4, 112, 0),
+    110: (4, 88, 0),
+    111: (4, 64, 0),
 }
 
 # Frame roles, from the disassembly of NM_UNPACKED.EXE.

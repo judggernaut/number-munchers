@@ -57,8 +57,9 @@ describe('muncher frame selection', () => {
     expect(muncherFrameIndex(100, 1)).toBe(0);
   });
 
-  it('matches the original timing: 7 frames in ~240 ms', () => {
-    expect(MUNCH_ANIM_MS).toBe(240);
+  it('plays the original 7-frame pass at a readable speed', () => {
+    // The binary runs the same pass in ~240 ms; 70 ms/frame keeps it visible.
+    expect(MUNCH_FRAME_MS).toBe(70);
     expect(Math.round(MUNCH_FRAME_MS * FRAMES)).toBe(MUNCH_ANIM_MS);
   });
 
