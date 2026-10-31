@@ -51,10 +51,17 @@ export class Music {
   private enabled = true;
   private started = false;
   private failures = 0;
+  private volumeScale = 1;
   readonly volume: number;
 
   constructor(volume = 0.08) {
     this.volume = volume;
+  }
+
+  /** Global 0..1 volume level; scales the low base music volume. */
+  setVolumeScale(scale: number): void {
+    this.volumeScale = Math.max(0, Math.min(1, scale));
+    if (this.element) this.element.volume = this.volume * this.volumeScale;
   }
 
   get trackCount(): number {
@@ -117,7 +124,7 @@ export class Music {
 
     if (!this.element) {
       this.element = new Audio();
-      this.element.volume = this.volume;
+      this.element.volume = this.volume * this.volumeScale;
       this.element.addEventListener('ended', () => this.advance());
       this.element.addEventListener('error', () => {
         this.failures += 1;

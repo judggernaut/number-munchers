@@ -18,6 +18,7 @@ import {
 import { planLesson } from './lesson-view';
 import { PAUSE_ITEMS, cycleIndex, rowAt } from './menu-nav';
 import { wrapToWidth } from './text-layout';
+import { drawSoundButton, hitSoundButton, nextVolume, volumeLabel } from './sound-button';
 import { drawVisual } from '../engine/visuals';
 import { GameSession, PAUSE_BUTTON, type SessionEvent } from '../game/session';
 
@@ -47,8 +48,9 @@ interface Settings {
   band: Band;
   difficulty: DifficultyId;
   ruleset: RulesetId;
-  muted: boolean;
   music: boolean;
+  sfx: boolean;
+  volume: number;
 }
 
 interface ScoreEntry {
@@ -69,8 +71,9 @@ const DEFAULT_SETTINGS: Settings = {
   band: 'elementary',
   difficulty: 'normal',
   ruleset: 'modern',
-  muted: false,
   music: true,
+  sfx: true,
+  volume: 1,
 };
 
 const DIFFICULTIES: DifficultyId[] = ['chill', 'normal', 'fast'];
@@ -100,6 +103,8 @@ export class App {
   private pauseIndex = 0;
   private lessonTopic: Topic | null = null;
   private lessonFrom: 'play' | 'topics' | 'menu' | 'briefing' = 'menu';
+  private volumeToastUntil = 0;
+  private lastNonZeroVolume = 1;
 
   private stars: Array<{ x: number; y: number; s: number; c: string }> = [];
   private startedAt = performance.now();
@@ -145,6 +150,7 @@ export class App {
       heading: this.session?.round.heading,
       topic: this.session?.topic.id,
       musicTracks: this.music.trackCount,
+      muncherFrames: this.sprites.muncherFrames.length,
       musicEnabled: this.music.isEnabled,
       musicPlaying: this.music.isPlaying,
     };
@@ -171,9 +177,17 @@ export class App {
   private frame = (now: number): void => {
     const dt = Math.min(48, now - this.lastFrame);
     this.lastFrame = now;
-    const actions = this.input.drain();
+    let actions = this.input.drain();
+    let pointer = this.input.takePointer();
+
+    // The corner sound button never falls through to the screen under it.
+    if (pointer && hitSoundButton(pointer.x, pointer.y)) {
+      this.applyVolume(nextVolume(this.settings.volume));
+      actions = actions.filter((action) => action !== 'confirm');
+      pointer = null;
+    }
+
     this.lastActions = actions;
-    const pointer = this.input.takePointer();
     this.lastPointer = pointer ? { x: pointer.x, y: pointer.y } : null;
     // Any interaction (and every level change) keeps the playlist alive.
     if (actions.length > 0 || pointer) this.music.resumeIfNeeded();
@@ -204,8 +218,11 @@ export class App {
       this.settings = { ...DEFAULT_SETTINGS };
       this.scores = [];
     }
-    this.audio.setMuted(this.settings.muted);
-    this.music.setEnabled(this.settings.music && !this.settings.muted);
+    this.audio.setEnabled(this.settings.sfx);
+    this.audio.setVolume(this.settings.volume);
+    this.music.setEnabled(this.settings.music && this.settings.volume > 0);
+    this.music.setVolumeScale(this.settings.volume);
+    if (this.settings.volume > 0) this.lastNonZeroVolume = this.settings.volume;
     this.bandIndex = Math.max(0, BANDS.indexOf(this.settings.band));
   }
 
@@ -304,6 +321,18 @@ export class App {
     this.pauseIndex = 0;
     this.audio.play('menu');
     this.announce('Returned to the main menu.');
+  }
+
+  /** Set the global level everywhere it matters and show a toast. */
+  private applyVolume(volume: number): void {
+    this.settings.volume = volume;
+    if (volume > 0) this.lastNonZeroVolume = volume;
+    this.audio.setVolume(volume);
+    this.music.setVolumeScale(volume);
+    this.music.setEnabled(this.settings.music && volume > 0);
+    this.saveSettings();
+    this.volumeToastUntil = performance.now() + 1400;
+    this.announce(`Volume ${volumeLabel(volume)}.`);
   }
 
   private openTopics(): void {
@@ -410,9 +439,9 @@ export class App {
   ): void {
     for (const action of actions) {
       if (action === 'mute') {
-        this.settings.muted = this.audio.toggle();
-        this.music.setEnabled(this.settings.music && !this.settings.muted);
-        this.saveSettings();
+        // M toggles between silent and the last audible level.
+        const volume = this.settings.volume > 0 ? 0 : this.lastNonZeroVolume;
+        this.applyVolume(volume);
       }
     }
 
@@ -682,7 +711,7 @@ export class App {
       }
       case 3: {
         this.settings.music = !this.settings.music;
-        this.music.setEnabled(this.settings.music && !this.settings.muted);
+        this.music.setEnabled(this.settings.music && this.settings.volume > 0);
         break;
       }
       default:
@@ -700,8 +729,8 @@ export class App {
         this.cycleOption(1);
         break;
       case 4:
-        this.settings.muted = this.audio.toggle();
-        this.music.setEnabled(this.settings.music && !this.settings.muted);
+        this.settings.sfx = !this.settings.sfx;
+        this.audio.setEnabled(this.settings.sfx);
         this.saveSettings();
         this.audio.play('select');
         break;
@@ -725,6 +754,7 @@ export class App {
       // The session owns the frame; the pause panel draws over the finished board.
       this.session.draw(this.screen, now);
       if (this.paused) this.drawPause(now);
+      this.drawSoundChip(now);
       return;
     }
     const t = now - this.startedAt;
@@ -756,6 +786,13 @@ export class App {
         break;
     }
     this.screen.end();
+    this.drawSoundChip(now);
+  }
+
+  /** The sound control: same corner on every screen. */
+  private drawSoundChip(now: number): void {
+    const toast = now < this.volumeToastUntil ? volumeLabel(this.settings.volume) : null;
+    drawSoundButton(this.screen, this.settings.volume, toast);
   }
 
   private drawLogo(y: number, now: number): void {
@@ -807,7 +844,7 @@ export class App {
     this.screen.text(
       `BAND ${BAND_LABELS[this.settings.band]}   ${RULESETS[this.settings.ruleset].label.toUpperCase()}   ${
         DIFFICULTY_LABELS[this.settings.difficulty].toUpperCase()
-      }   SOUND ${this.audio.isMuted ? 'OFF' : 'ON'}${best ? `   BEST ${best.score}` : ''}`,
+      }   VOL ${volumeLabel(this.settings.volume)}${best ? `   BEST ${best.score}` : ''}`,
       320,
       378,
       { size: 9, color: C.dim, align: 'center' },
@@ -922,7 +959,7 @@ export class App {
         label: 'MUSIC',
         value: this.settings.music ? `ON (${this.music.trackCount} TRACKS)` : 'OFF',
       },
-      { label: 'SOUND', value: this.audio.isMuted ? 'OFF' : 'ON' },
+      { label: 'SOUND FX', value: this.settings.sfx ? 'ON' : 'OFF' },
       { label: 'CLEAR HIGH SCORES', value: 'PRESS ENTER' },
       { label: 'BACK', value: '' },
     ];

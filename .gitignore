@@ -16,3 +16,7 @@ tools/re/nm-snap/
 tools/re/out/
 tools/re/unlzexe
 tools/re/*.EXE
+
+# Optional original-art sprite pack (MECC artwork): stays local, not committed.
+# See CREDITS.md before shipping it.
+public/sprites/

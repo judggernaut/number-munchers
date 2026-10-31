@@ -50,8 +50,8 @@ sharing: `http://localhost:3000/?topic=function-families`.
 | Learn | L (lesson for the current topic) |
 | Scroll topics | Up/Down (chevrons and a scrollbar show there is more) |
 | Walk to a cell | Click / tap it |
-| Pause | Esc (Esc again quits to the menu) |
-| Mute | M |
+| Pause | Esc (Esc again quits to the menu), or the MENU chip |
+| Volume | corner speaker button (100% / 60% / 30% / mute) or M |
 
 ## Curriculum
 

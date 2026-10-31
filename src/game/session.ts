@@ -2,6 +2,7 @@ import type { Rng, TileVisual, Topic } from '../content/types';
 import type { Sprites } from '../engine/sprites';
 import type { Screen } from '../engine/screen';
 import { drawVisual } from '../engine/visuals';
+import { muncherFrameIndex } from './muncher-frames';
 import { drawTile, type TileCanvas } from './tile-render';
 import { planOverlay, wrapToWidth } from '../ui/text-layout';
 import type { Action } from '../engine/input';
@@ -91,6 +92,10 @@ export class GameSession {
 
   private troggleClock = 0;
   private stepClock = 0;
+  /** Animation clock (ms, dt-accumulated so tests stay deterministic). */
+  private animClock = 0;
+  private munchAnimAt = -1;
+  private moveAnimAt = -1;
   private holdMs = 0;
   private clickTarget: Cell | null = null;
   private nextTroggleId = 1;
@@ -174,6 +179,7 @@ export class GameSession {
   }
 
   update(dt: number, actions: Action[], heldDir: { dc: number; dr: number } | null): void {
+    this.animClock += dt;
     if (this.status === 'gameover') return;
 
     // Getting eaten gets its own beat: chomp, shake, then the message.
@@ -301,10 +307,13 @@ export class GameSession {
     this.muncher.col = next.col;
     this.muncher.row = next.row;
     this.muncher.movedAt = performance.now();
+    this.moveAnimAt = this.animClock;
     this.checkContact();
   }
 
   private munch(): void {
+    // The mouth chomps even when the cell is empty: it tried.
+    this.munchAnimAt = this.animClock;
     const index = this.indexOf(this.muncher.col, this.muncher.row);
     const cell = this.cells[index];
     if (!cell || cell.eaten || cell.text === '') return;
@@ -546,7 +555,8 @@ export class GameSession {
       const row = Math.floor(i / perRow);
       const col = i % perRow;
       const rowCount = Math.min(perRow, total - row * perRow);
-      const startX = 628 - (rowCount * (pipW + gap) - gap);
+      // Ends left of the corner sound chip (see ui/sound-button.ts).
+      const startX = 586 - (rowCount * (pipW + gap) - gap);
       screen.rect(startX + col * (pipW + gap), 7 + row * 7, pipW, pipW, i < done ? '#7dffb0' : '#1b2fb5');
     }
 
@@ -663,8 +673,26 @@ export class GameSession {
         ? this.deps.sprites.muncherSad
         : this.status === 'clear' || this.status === 'interlude'
           ? this.deps.sprites.muncherHappy
-          : this.deps.sprites.muncher;
+          : this.animateMuncherSprite();
     screen.sprite(muncherSprite, mx, my, 60);
+  }
+
+  /**
+   * Original-art frames when the optional pack is present: fast cycle while
+   * munching, slower while walking, first frame at rest. Falls back to the
+   * bundled static Muncher.
+   */
+  private animateMuncherSprite(): HTMLImageElement {
+    const frames = this.deps.sprites.muncherFrames;
+    if (frames.length <= 1) return this.deps.sprites.muncher;
+    const index = muncherFrameIndex(
+      {
+        munchElapsed: this.munchAnimAt < 0 ? null : this.animClock - this.munchAnimAt,
+        moveElapsed: this.moveAnimAt < 0 ? null : this.animClock - this.moveAnimAt,
+      },
+      frames.length,
+    );
+    return frames[index] ?? this.deps.sprites.muncher;
   }
 
   private drawFooter(screen: Screen, now: number): void {

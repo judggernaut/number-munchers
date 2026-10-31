@@ -1,6 +1,10 @@
 /**
  * Tiny square-wave synth. No assets, no libraries: a few oscillators scheduled
  * per event give the game its arcade voice.
+ *
+ * Two independent controls:
+ *   - enabled  : whether sound effects play at all (Options screen)
+ *   - volume   : the global 0..1 level shared with the music (corner button / M)
  */
 export type SfxName =
   | 'munch'
@@ -33,9 +37,7 @@ const RECIPES: Record<SfxName, Note[]> = {
     { freq: 659, dur: 0.09, delay: 0.09, type: 'square' },
     { freq: 784, dur: 0.14, delay: 0.18, type: 'square' },
   ],
-  death: [
-    { freq: 320, dur: 0.3, type: 'triangle', gain: 0.2, slideTo: 70 },
-  ],
+  death: [{ freq: 320, dur: 0.3, type: 'triangle', gain: 0.2, slideTo: 70 }],
   gameOver: [
     { freq: 440, dur: 0.16, type: 'square' },
     { freq: 330, dur: 0.16, delay: 0.16, type: 'square' },
@@ -55,24 +57,45 @@ const RECIPES: Record<SfxName, Note[]> = {
   ],
 };
 
+/** SFX sit a bit under the music so neither fights the other. */
+const SFX_GAIN = 0.5;
+
 export class Audio {
   private ctx: AudioContext | null = null;
-  private muted = false;
   private master: GainNode | null = null;
+  private enabled = true;
+  private volume = 1;
 
-  constructor(muted = false) {
-    this.muted = muted;
+  /** Sound effects on/off (Options). */
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+  }
+
+  get isEnabled(): boolean {
+    return this.enabled;
+  }
+
+  /** Global volume 0..1, shared with the music. */
+  setVolume(volume: number): void {
+    this.volume = Math.max(0, Math.min(1, volume));
+    if (this.master) this.master.gain.value = SFX_GAIN * this.volume;
+  }
+
+  get currentVolume(): number {
+    return this.volume;
   }
 
   /** Lazily create the context: browsers require a user gesture first. */
   private ensure(): AudioContext | null {
-    if (this.muted) return null;
+    if (!this.enabled || this.volume <= 0) return null;
     if (!this.ctx) {
-      const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const Ctor =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!Ctor) return null;
       this.ctx = new Ctor();
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.5;
+      this.master.gain.value = SFX_GAIN * this.volume;
       this.master.connect(this.ctx.destination);
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
@@ -99,24 +122,5 @@ export class Audio {
       osc.start(start);
       osc.stop(end + 0.02);
     }
-  }
-
-  toggle(): boolean {
-    this.muted = !this.muted;
-    if (this.muted && this.ctx) {
-      void this.ctx.suspend();
-    } else if (!this.muted) {
-      void this.ensure();
-    }
-    return this.muted;
-  }
-
-  setMuted(muted: boolean): void {
-    if (this.muted === muted) return;
-    this.toggle();
-  }
-
-  get isMuted(): boolean {
-    return this.muted;
   }
 }

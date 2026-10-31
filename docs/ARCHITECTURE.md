@@ -144,6 +144,18 @@ page built from the topic blurb and a live round, so a new topic is never
 linkless. The page is reachable from a wrong answer (`L`), the pause menu, and
 the topic picker.
 
+## Optional asset packs
+
+Two folders load at runtime and degrade gracefully when missing:
+
+| Folder | Contents | Absent behaviour |
+| --- | --- | --- |
+| `music/` | licensed background tracks + manifest | game runs silent |
+| `sprites/muncher/` | 1990 Muncher frames + manifest | static bundled Muncher |
+
+Both manifests are validated (plain file names only, no paths or URLs) and both
+are git-ignored - see CREDITS.md for why the sprite pack is not redistributed.
+
 ## Rulesets
 
 `src/game/rules.ts` exposes two `RuleSet` objects: `modern` (tuned pacing) and

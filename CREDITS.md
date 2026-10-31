@@ -29,6 +29,15 @@ project's Apache-2.0 license. They are recreations, not extracted EGA tiles.
 Fonts are rendered with the platform's monospace stack; no webfont is
 downloaded at runtime.
 
+## Original-art sprite pack (optional, local only)
+
+`public/sprites/muncher/` holds animation frames ripped from the 1990 MECC
+release (source: The Spriters Resource, asset 36696). They are MECC/SoftKey
+artwork, not ours to redistribute, so the folder is git-ignored: local builds
+animate the Muncher with them, the public build falls back to the bundled
+Apache-licensed Muncher automatically. Do not commit that folder unless you
+have cleared the rights to ship MECC artwork.
+
 ## Audio and cutscenes
 
 Sound effects are synthesised at runtime with WebAudio oscillators; no audio
