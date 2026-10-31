@@ -151,7 +151,10 @@ Two folders load at runtime and degrade gracefully when missing:
 | Folder | Contents | Absent behaviour |
 | --- | --- | --- |
 | `music/` | licensed background tracks + manifest | game runs silent |
-| `sprites/muncher/` | 1990 Muncher frames + manifest | static bundled Muncher |
+| `sprites/muncher/` | 1990 Muncher frames + rest pose + manifest | static bundled Muncher |
+
+The Muncher cycles those frames only while munching; walking and standing use
+the manifest's `rest` frame (closed mouth), so it never bites at every step.
 
 Both manifests are validated (plain file names only, no paths or URLs) and both
 are git-ignored - see CREDITS.md for why the sprite pack is not redistributed.

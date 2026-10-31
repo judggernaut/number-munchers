@@ -31,12 +31,13 @@ downloaded at runtime.
 
 ## Original-art sprite pack (optional, local only)
 
-`public/sprites/muncher/` holds animation frames ripped from the 1990 MECC
-release (source: The Spriters Resource, asset 36696). They are MECC/SoftKey
-artwork, not ours to redistribute, so the folder is git-ignored: local builds
-animate the Muncher with them, the public build falls back to the bundled
-Apache-licensed Muncher automatically. Do not commit that folder unless you
-have cleared the rights to ship MECC artwork.
+`public/sprites/muncher/` holds the 14 Muncher animation frames extracted from
+the original game files by `tools/re/extract_muncher_frames.py` (NCGA/NMCGA
+.RES PCX sheets, connected-component slicing, palette applied by role). They
+are MECC/SoftKey artwork, not ours to redistribute, so the folder is
+git-ignored: local builds animate the Muncher with them, the public build falls
+back to the bundled Apache-licensed Muncher automatically. Do not commit that
+folder unless you have cleared the rights to ship MECC artwork.
 
 ## Audio and cutscenes
 

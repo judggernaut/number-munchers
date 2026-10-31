@@ -2,7 +2,7 @@ import type { Rng, TileVisual, Topic } from '../content/types';
 import type { Sprites } from '../engine/sprites';
 import type { Screen } from '../engine/screen';
 import { drawVisual } from '../engine/visuals';
-import { muncherFrameIndex } from './muncher-frames';
+import { isMunching, muncherFrameIndex } from './muncher-frames';
 import { drawTile, type TileCanvas } from './tile-render';
 import { planOverlay, wrapToWidth } from '../ui/text-layout';
 import type { Action } from '../engine/input';
@@ -95,7 +95,6 @@ export class GameSession {
   /** Animation clock (ms, dt-accumulated so tests stay deterministic). */
   private animClock = 0;
   private munchAnimAt = -1;
-  private moveAnimAt = -1;
   private holdMs = 0;
   private clickTarget: Cell | null = null;
   private nextTroggleId = 1;
@@ -307,7 +306,6 @@ export class GameSession {
     this.muncher.col = next.col;
     this.muncher.row = next.row;
     this.muncher.movedAt = performance.now();
-    this.moveAnimAt = this.animClock;
     this.checkContact();
   }
 
@@ -678,20 +676,18 @@ export class GameSession {
   }
 
   /**
-   * Original-art frames when the optional pack is present: fast cycle while
-   * munching, slower while walking, first frame at rest. Falls back to the
-   * bundled static Muncher.
+   * Original-art frames when the optional pack is present: the sheet cycles
+   * only while munching. Walking and standing use the closed-mouth rest pose,
+   * so the Muncher does not bite at every step.
    */
   private animateMuncherSprite(): HTMLImageElement {
     const frames = this.deps.sprites.muncherFrames;
     if (frames.length <= 1) return this.deps.sprites.muncher;
-    const index = muncherFrameIndex(
-      {
-        munchElapsed: this.munchAnimAt < 0 ? null : this.animClock - this.munchAnimAt,
-        moveElapsed: this.moveAnimAt < 0 ? null : this.animClock - this.moveAnimAt,
-      },
-      frames.length,
-    );
+    const elapsed = this.munchAnimAt < 0 ? null : this.animClock - this.munchAnimAt;
+    if (!isMunching(elapsed)) {
+      return this.deps.sprites.muncherRest ?? this.deps.sprites.muncher;
+    }
+    const index = muncherFrameIndex(elapsed, frames.length);
     return frames[index] ?? this.deps.sprites.muncher;
   }
 

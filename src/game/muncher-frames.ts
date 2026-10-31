@@ -1,33 +1,26 @@
 /**
  * Muncher animation frame selection, pure so it is testable.
  *
- * When the optional original-art pack (public/sprites/muncher) is present the
- * Muncher is drawn from the 1990 sprite frames instead of a single static
- * image: a fast frame cycle right after a munch, a slower walk cycle, and the
- * first frame at rest.
+ * The Muncher only cycles frames while it munches. Walking and standing use
+ * the rest frame (mouth closed) - cycling while walking made it look like it
+ * was biting at every step.
  */
 
-export const MUNCH_ANIM_MS = 450;
-export const MOVE_ANIM_MS = 380;
-export const MUNCH_FRAME_MS = 70;
-export const MOVE_FRAME_MS = 140;
+/** One full munch: 14 frames at 40 ms reads as a quick, snappy chomp. */
+export const MUNCH_ANIM_MS = 560;
+export const MUNCH_FRAME_MS = 40;
 
-export interface MuncherFrameState {
-  /** Milliseconds since the last munch attempt, or null. */
-  munchElapsed: number | null;
-  /** Milliseconds since the last step, or null. */
-  moveElapsed: number | null;
+/**
+ * Frame index for a munch in progress. Returns 0 (the rest pose) when no munch
+ * is happening; the caller draws the rest image in that case anyway.
+ */
+export function muncherFrameIndex(munchElapsed: number | null, frameCount: number): number {
+  if (frameCount <= 1) return 0;
+  if (munchElapsed === null || munchElapsed < 0 || munchElapsed >= MUNCH_ANIM_MS) return 0;
+  return Math.floor(munchElapsed / MUNCH_FRAME_MS) % frameCount;
 }
 
-export function muncherFrameIndex(state: MuncherFrameState, frameCount: number): number {
-  if (frameCount <= 1) return 0;
-  const { munchElapsed, moveElapsed } = state;
-  if (munchElapsed !== null && munchElapsed >= 0 && munchElapsed < MUNCH_ANIM_MS) {
-    return Math.floor(munchElapsed / MUNCH_FRAME_MS) % frameCount;
-  }
-  if (moveElapsed !== null && moveElapsed >= 0 && moveElapsed < MOVE_ANIM_MS) {
-    return Math.floor(moveElapsed / MOVE_FRAME_MS) % frameCount;
-  }
-  // At rest: the first frame.
-  return 0;
+/** True while a munch animation is still playing. */
+export function isMunching(munchElapsed: number | null): boolean {
+  return munchElapsed !== null && munchElapsed >= 0 && munchElapsed < MUNCH_ANIM_MS;
 }

@@ -22,8 +22,10 @@ export interface Sprites {
   muncherSad: HTMLImageElement;
   opening: HTMLImageElement;
   troggles: Record<TroggleSpecies, HTMLImageElement>;
-  /** 1990 animation frames from the optional pack; empty when absent. */
+  /** 1990 munch frames from the optional pack; empty when absent. */
   muncherFrames: HTMLImageElement[];
+  /** Closed-mouth pose from the pack; null when absent. */
+  muncherRest: HTMLImageElement | null;
 }
 
 function load(src: string): Promise<HTMLImageElement> {
@@ -37,6 +39,7 @@ function load(src: string): Promise<HTMLImageElement> {
 
 interface FrameManifest {
   frames?: unknown;
+  rest?: unknown;
 }
 
 /** Plain relative file names only; never paths or URLs from the manifest. */
@@ -47,21 +50,27 @@ function frameNames(manifest: FrameManifest): string[] {
   );
 }
 
-async function loadMuncherFrames(): Promise<HTMLImageElement[]> {
+async function loadMuncherPack(): Promise<{ frames: HTMLImageElement[]; rest: HTMLImageElement | null }> {
   try {
     const response = await fetch('./sprites/muncher/manifest.json', { cache: 'no-store' });
-    if (!response.ok) return [];
-    const names = frameNames(await response.json());
-    if (names.length === 0) return [];
-    return await Promise.all(names.map((name) => load(`./sprites/muncher/${name}`)));
+    if (!response.ok) return { frames: [], rest: null };
+    const manifest = await response.json();
+    const names = frameNames(manifest);
+    if (names.length === 0) return { frames: [], rest: null };
+    const frames = await Promise.all(names.map((name) => load(`./sprites/muncher/${name}`)));
+    const restName = typeof manifest.rest === 'string' && /^[\w-]+\.png$/.test(manifest.rest)
+      ? manifest.rest
+      : null;
+    const rest = restName ? await load(`./sprites/muncher/${restName}`).catch(() => null) : null;
+    return { frames, rest };
   } catch {
     // No pack (the public build): the static Muncher is used instead.
-    return [];
+    return { frames: [], rest: null };
   }
 }
 
 export async function loadSprites(): Promise<Sprites> {
-  const [muncher, muncherHappy, muncherSad, opening, reggie, worker, smarty, bashful, helper, frames] =
+  const [muncher, muncherHappy, muncherSad, opening, reggie, worker, smarty, bashful, helper, pack] =
     await Promise.all([
       load(muncherUrl),
       load(muncherHappyUrl),
@@ -72,7 +81,7 @@ export async function loadSprites(): Promise<Sprites> {
       load(smartyUrl),
       load(bashfulUrl),
       load(helperUrl),
-      loadMuncherFrames(),
+      loadMuncherPack(),
     ]);
   return {
     muncher,
@@ -86,6 +95,7 @@ export async function loadSprites(): Promise<Sprites> {
       timidus: bashful,
       assistus: helper,
     },
-    muncherFrames: frames,
+    muncherFrames: pack.frames,
+    muncherRest: pack.rest,
   };
 }
