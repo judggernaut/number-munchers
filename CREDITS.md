@@ -31,9 +31,10 @@ downloaded at runtime.
 
 ## Original-art sprite pack (optional, local only)
 
-`public/sprites/muncher/` holds the 14 Muncher animation frames extracted from
-the original game files by `tools/re/extract_muncher_frames.py` (NCGA/NMCGA
-.RES PCX sheets, connected-component slicing, palette applied by role). They
+`public/sprites/muncher/` holds the Muncher animation extracted from the
+original game files by `tools/re/extract_muncher_frames.py`: the 16-frame
+table from the BTMP blit list plus the frame roles recovered from the
+disassembly (munch 0-6, rest 4, walk 3, ouch 2, caught 6). They
 are MECC/SoftKey artwork, not ours to redistribute, so the folder is
 git-ignored: local builds animate the Muncher with them, the public build falls
 back to the bundled Apache-licensed Muncher automatically. Do not commit that

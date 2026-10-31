@@ -1,18 +1,22 @@
 /**
- * Muncher animation frame selection, pure so it is testable.
+ * Muncher animation, matched to the original binary.
  *
- * The Muncher only cycles frames while it munches. Walking and standing use
- * the rest frame (mouth closed) - cycling while walking made it look like it
- * was biting at every step.
+ * From NM.EXE (see docs/re/original-analysis.md):
+ *   - the munch is ONE pass of frames 0..6, 7 scheduler frames ≈ 240 ms
+ *     (FUN_17e7_1539)
+ *   - standing and walking are a single static pose, frame 4 / frame 3 -
+ *     the same bitmap (FUN_17e7_1c31, FUN_17e7_11dd); the mouth does not
+ *     animate while moving
+ *   - frame 2 is the wrong-munch pose, frame 6 the caught-by-Troggle pose
  */
 
-/** One full munch: 14 frames at 40 ms reads as a quick, snappy chomp. */
-export const MUNCH_ANIM_MS = 560;
-export const MUNCH_FRAME_MS = 40;
+/** One full munch: 7 frames at the scheduler's ~34.32 ms tick. */
+export const MUNCH_ANIM_MS = 240;
+export const MUNCH_FRAME_MS = 240 / 7;
 
 /**
- * Frame index for a munch in progress. Returns 0 (the rest pose) when no munch
- * is happening; the caller draws the rest image in that case anyway.
+ * Frame index within the munch cycle. Returns 0 outside a munch; the caller
+ * draws the rest pose in that case anyway.
  */
 export function muncherFrameIndex(munchElapsed: number | null, frameCount: number): number {
   if (frameCount <= 1) return 0;

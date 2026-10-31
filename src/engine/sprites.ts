@@ -13,8 +13,9 @@ import type { TroggleSpecies } from '../game/troggle';
 /**
  * The bundled Muncher/Troggle art is the Apache-licensed set carried over from
  * the upstream fork. When the optional original-art pack
- * (public/sprites/muncher, kept out of the repo) is present, its frames
- * replace the static Muncher image so the mouth really animates.
+ * (public/sprites/muncher, kept out of the repo) is present, the Muncher is
+ * drawn from the 1990 frames: the 7-frame munch cycle and the frame-4 rest
+ * pose, exactly as the original code drives them.
  */
 export interface Sprites {
   muncher: HTMLImageElement;
@@ -40,6 +41,7 @@ function load(src: string): Promise<HTMLImageElement> {
 interface FrameManifest {
   frames?: unknown;
   rest?: unknown;
+  munch?: unknown;
 }
 
 /** Plain relative file names only; never paths or URLs from the manifest. */
@@ -50,6 +52,11 @@ function frameNames(manifest: FrameManifest): string[] {
   );
 }
 
+/**
+ * The manifest lists the sheet's frame table in blit order plus the roles the
+ * original code uses: `munch` (frame indices for the munch cycle, 0..6) and
+ * `rest` (the standing/walking pose, frame 4).
+ */
 async function loadMuncherPack(): Promise<{ frames: HTMLImageElement[]; rest: HTMLImageElement | null }> {
   try {
     const response = await fetch('./sprites/muncher/manifest.json', { cache: 'no-store' });
@@ -57,11 +64,25 @@ async function loadMuncherPack(): Promise<{ frames: HTMLImageElement[]; rest: HT
     const manifest = await response.json();
     const names = frameNames(manifest);
     if (names.length === 0) return { frames: [], rest: null };
-    const frames = await Promise.all(names.map((name) => load(`./sprites/muncher/${name}`)));
-    const restName = typeof manifest.rest === 'string' && /^[\w-]+\.png$/.test(manifest.rest)
-      ? manifest.rest
-      : null;
-    const rest = restName ? await load(`./sprites/muncher/${restName}`).catch(() => null) : null;
+    const loaded = await Promise.all(
+      names.map((name) => load(`./sprites/muncher/${name}`).catch(() => null)),
+    );
+    const table = loaded.filter((image): image is HTMLImageElement => image !== null);
+    if (table.length === 0) return { frames: [], rest: null };
+
+    const munchIndices: number[] = Array.isArray(manifest.munch)
+      ? manifest.munch.filter(
+          (value: unknown): value is number =>
+            Number.isInteger(value) && (value as number) >= 0 && (value as number) < table.length,
+        )
+      : [];
+    const frames = munchIndices.length > 0 ? munchIndices.map((i: number) => table[i]!) : table;
+
+    const restIndex =
+      Number.isInteger(manifest.rest) && (manifest.rest as number) >= 0 && (manifest.rest as number) < table.length
+        ? (manifest.rest as number)
+        : -1;
+    const rest = restIndex >= 0 ? table[restIndex]! : null;
     return { frames, rest };
   } catch {
     // No pack (the public build): the static Muncher is used instead.
